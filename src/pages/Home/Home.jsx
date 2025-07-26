@@ -1,8 +1,11 @@
 import { ShoppingCart, User } from 'lucide-react';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import LocationManager from '../../components/LocationManager';
 
 const Home = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Mock seller data (now representing raw material providers)
   const sellers = [
@@ -111,6 +114,7 @@ const Home = () => {
           </div>
         </div>
       </nav>
+    <LocationManager /> {/* Assuming LocationManager is imported and used here */}
 
       {/* --- Hero Section --- */}
       <section className="bg-gradient-to-r from-orange-100 to-amber-100 py-16 px-4 md:py-24">
@@ -193,6 +197,7 @@ const Home = () => {
                       seller.isOpen ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-400 cursor-not-allowed'
                     }`}
                     disabled={!seller.isOpen}
+                    onClick={() => navigate('/products')}
                   >
                     View Products
                   </button>
