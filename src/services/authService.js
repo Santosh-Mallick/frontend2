@@ -52,6 +52,9 @@ class AuthService {
         localStorage.setItem('token', data.token);
         localStorage.setItem('userType', userType);
         localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Store specific user information for easy access
+        this.storeUserInfo(data.user, userType);
       } catch (error) {
         if (this.enableLogs) {
           console.error('Error storing data in localStorage:', error);
@@ -102,6 +105,9 @@ class AuthService {
         localStorage.setItem('token', data.token);
         localStorage.setItem('userType', userType);
         localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Store specific user information for easy access
+        this.storeUserInfo(data.user, userType);
       } catch (error) {
         if (this.enableLogs) {
           console.error('Error storing data in localStorage:', error);
@@ -124,6 +130,76 @@ class AuthService {
     }
   }
 
+  // Store specific user information in localStorage
+  storeUserInfo(user, userType) {
+    try {
+      if (userType === 'buyer') {
+        // Store buyer information
+        localStorage.setItem('userName', user.name || '');
+        localStorage.setItem('userEmail', user.email || '');
+        localStorage.setItem('userPhone', user.phone || '');
+        
+        if (this.enableLogs) {
+          console.log('Stored buyer info:', {
+            name: user.name,
+            email: user.email,
+            phone: user.phone
+          });
+        }
+      } else if (userType === 'seller') {
+        // Store seller information
+        localStorage.setItem('shopName', user.name || ''); // Shop/Stall name
+        localStorage.setItem('ownerName', user.ownerName || '');
+        localStorage.setItem('userEmail', user.email || '');
+        localStorage.setItem('userPhone', user.phone || '');
+        
+        if (this.enableLogs) {
+          console.log('Stored seller info:', {
+            shopName: user.name,
+            ownerName: user.ownerName,
+            email: user.email,
+            phone: user.phone
+          });
+        }
+      }
+    } catch (error) {
+      if (this.enableLogs) {
+        console.error('Error storing user info:', error);
+      }
+    }
+  }
+
+  // Get stored user information
+  getUserInfo() {
+    try {
+      const userType = localStorage.getItem('userType');
+      
+      if (userType === 'buyer') {
+        return {
+          name: localStorage.getItem('userName') || '',
+          email: localStorage.getItem('userEmail') || '',
+          phone: localStorage.getItem('userPhone') || '',
+          userType: 'buyer'
+        };
+      } else if (userType === 'seller') {
+        return {
+          shopName: localStorage.getItem('shopName') || '',
+          ownerName: localStorage.getItem('ownerName') || '',
+          email: localStorage.getItem('userEmail') || '',
+          phone: localStorage.getItem('userPhone') || '',
+          userType: 'seller'
+        };
+      }
+      
+      return null;
+    } catch (error) {
+      if (this.enableLogs) {
+        console.error('Error getting user info:', error);
+      }
+      return null;
+    }
+  }
+
   // Logout user
   async logout() {
     try {
@@ -131,6 +207,13 @@ class AuthService {
       localStorage.removeItem('token');
       localStorage.removeItem('userType');
       localStorage.removeItem('user');
+      
+      // Clear specific user information
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userPhone');
+      localStorage.removeItem('shopName');
+      localStorage.removeItem('ownerName');
       
       // Optional: Call logout endpoint
       const token = localStorage.getItem('token');

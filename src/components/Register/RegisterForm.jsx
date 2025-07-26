@@ -120,15 +120,15 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* User Type Selection */}
         <div className="space-y-3">
-          <label className="text-white text-sm font-medium">Register as:</label>
+          <label className="text-gray-700 text-sm font-medium">Register as:</label>
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, userType: 'buyer' }))}
               className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all duration-200 ${
                 formData.userType === 'buyer'
-                  ? 'border-blue-400 bg-blue-500/20 text-blue-200'
-                  : 'border-gray-600 bg-gray-800/50 text-gray-300 hover:border-gray-500'
+                  ? 'border-orange-400 bg-orange-500/20 text-orange-700'
+                  : 'border-gray-300 bg-gray-50 text-gray-600 hover:border-orange-300'
               }`}
             >
               <ShoppingBag size={20} />
@@ -139,8 +139,8 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
               onClick={() => setFormData(prev => ({ ...prev, userType: 'seller' }))}
               className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all duration-200 ${
                 formData.userType === 'seller'
-                  ? 'border-purple-400 bg-purple-500/20 text-purple-200'
-                  : 'border-gray-600 bg-gray-800/50 text-gray-300 hover:border-gray-500'
+                  ? 'border-amber-400 bg-amber-500/20 text-amber-700'
+                  : 'border-gray-300 bg-gray-50 text-gray-600 hover:border-amber-300'
               }`}
             >
               <Store size={20} />
@@ -151,7 +151,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
 
         {/* Name Input */}
         <div className="space-y-2">
-          <label htmlFor="name" className="text-white text-sm font-medium">
+          <label htmlFor="name" className="text-gray-700 text-sm font-medium">
             {formData.userType === 'buyer' ? 'Full Name' : 'Shop/Stall Name'}
           </label>
           <div className="relative">
@@ -163,7 +163,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
               value={formData.name}
               onChange={handleInputChange}
               required
-              className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
               placeholder={formData.userType === 'buyer' ? 'Enter your full name' : 'Enter shop/stall name'}
             />
           </div>
@@ -172,7 +172,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
         {/* Owner Name (Seller only) */}
         {formData.userType === 'seller' && (
           <div className="space-y-2">
-            <label htmlFor="ownerName" className="text-white text-sm font-medium">
+            <label htmlFor="ownerName" className="text-gray-700 text-sm font-medium">
               Owner Name
             </label>
             <div className="relative">
@@ -184,7 +184,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
                 value={formData.ownerName}
                 onChange={handleInputChange}
                 required
-                className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                 placeholder="Enter owner name"
               />
             </div>
@@ -193,7 +193,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
 
         {/* Phone Input */}
         <div className="space-y-2">
-          <label htmlFor="phone" className="text-white text-sm font-medium">
+          <label htmlFor="phone" className="text-gray-700 text-sm font-medium">
             Phone Number
           </label>
           <div className="relative">
@@ -205,7 +205,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
               value={formData.phone}
               onChange={handleInputChange}
               required
-              className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
               placeholder="Enter your phone number"
             />
           </div>
@@ -213,7 +213,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
 
         {/* Email Input */}
         <div className="space-y-2">
-          <label htmlFor="email" className="text-white text-sm font-medium">
+          <label htmlFor="email" className="text-gray-700 text-sm font-medium">
             Email Address
           </label>
           <div className="relative">
@@ -225,7 +225,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
               value={formData.email}
               onChange={handleInputChange}
               required
-              className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
               placeholder="Enter your email"
             />
           </div>
@@ -233,14 +233,14 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
 
         {/* Password Input */}
         <div className="space-y-2">
-          <label htmlFor="password" className="text-white text-sm font-medium">
+          <label htmlFor="password" className="text-gray-700 text-sm font-medium">
             Password
           </label>
           <div className="relative">
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -251,7 +251,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
               value={formData.password}
               onChange={handleInputChange}
               required
-              className="w-full pl-4 pr-12 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full pl-4 pr-12 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
               placeholder="Enter your password"
             />
           </div>
@@ -259,14 +259,14 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
 
         {/* Confirm Password Input */}
         <div className="space-y-2">
-          <label htmlFor="confirmPassword" className="text-white text-sm font-medium">
+          <label htmlFor="confirmPassword" className="text-gray-700 text-sm font-medium">
             Confirm Password
           </label>
           <div className="relative">
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -277,7 +277,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
               value={formData.confirmPassword}
               onChange={handleInputChange}
               required
-              className="w-full pl-4 pr-12 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full pl-4 pr-12 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
               placeholder="Confirm your password"
             />
           </div>
@@ -285,8 +285,8 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
 
         {/* Error Message */}
         {error && (
-          <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
-            <p className="text-red-300 text-sm">{error}</p>
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700 text-sm">{error}</p>
           </div>
         )}
 
@@ -294,7 +294,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
           {isLoading ? (
             <div className="flex items-center justify-center gap-2">
@@ -308,12 +308,12 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
 
         {/* Switch to Login */}
         <div className="text-center">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-600 text-sm">
             Already have an account?{' '}
             <button
               type="button"
               onClick={onSwitchToLogin}
-              className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+              className="text-orange-600 hover:text-orange-700 font-medium transition-colors"
             >
               Sign in here
             </button>

@@ -128,6 +128,16 @@ class AuthController {
     return this.userType === 'seller';
   }
 
+  // Get user type
+  getUserType() {
+    return this.userType;
+  }
+
+  // Get stored user information
+  getUserInfo() {
+    return authService.getUserInfo();
+  }
+
   // Add listener for auth state changes
   addListener(callback) {
     this.listeners.push(callback);

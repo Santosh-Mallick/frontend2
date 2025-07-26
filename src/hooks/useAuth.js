@@ -40,12 +40,17 @@ export const useAuth = () => {
     return await authController.validateSession();
   };
 
+  const getUserInfo = () => {
+    return authController.getUserInfo();
+  };
+
   return {
     ...authState,
     login,
     register,
     logout,
     validateSession,
+    getUserInfo,
     isBuyer: authController.isBuyer(),
     isSeller: authController.isSeller()
   };

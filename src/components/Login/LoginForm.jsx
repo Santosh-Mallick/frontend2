@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, User, ShoppingBag, Store } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const LoginForm = ({ onLogin }) => {
-  const { login } = useAuth();
+  const { login, getUserInfo } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     identifier: '',
     phone: '',
@@ -13,6 +15,7 @@ const LoginForm = ({ onLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -22,17 +25,33 @@ const LoginForm = ({ onLogin }) => {
     }));
     // Clear error when user starts typing
     if (error) setError('');
+    if (successMessage) setSuccessMessage('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setSuccessMessage('');
     
     try {
       const result = await login(formData.identifier, formData.phone, formData.password, formData.userType);
       
       if (result.success) {
+        // Show success message with stored information
+        const userInfo = getUserInfo();
+        if (userInfo) {
+          const message = formData.userType === 'buyer' 
+            ? `Welcome back, ${userInfo.name}! Your information has been stored.`
+            : `Welcome back, ${userInfo.ownerName}! Your shop information has been stored.`;
+          
+          setSuccessMessage(message);
+          
+          // Navigate to home page after a short delay
+          setTimeout(() => {
+            navigate('/');
+          }, 1500);
+        }
         onLogin(formData);
       } else {
         setError(result.message);
@@ -50,15 +69,15 @@ const LoginForm = ({ onLogin }) => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* User Type Selection */}
         <div className="space-y-3">
-          <label className="text-white text-sm font-medium">Login as:</label>
+          <label className="text-gray-700 text-sm font-medium">Login as:</label>
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, userType: 'buyer' }))}
               className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all duration-200 ${
                 formData.userType === 'buyer'
-                  ? 'border-blue-400 bg-blue-500/20 text-blue-200'
-                  : 'border-gray-600 bg-gray-800/50 text-gray-300 hover:border-gray-500'
+                  ? 'border-orange-400 bg-orange-500/20 text-orange-700'
+                  : 'border-gray-300 bg-gray-50 text-gray-600 hover:border-orange-300'
               }`}
             >
               <ShoppingBag size={20} />
@@ -69,8 +88,8 @@ const LoginForm = ({ onLogin }) => {
               onClick={() => setFormData(prev => ({ ...prev, userType: 'seller' }))}
               className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all duration-200 ${
                 formData.userType === 'seller'
-                  ? 'border-purple-400 bg-purple-500/20 text-purple-200'
-                  : 'border-gray-600 bg-gray-800/50 text-gray-300 hover:border-gray-500'
+                  ? 'border-amber-400 bg-amber-500/20 text-amber-700'
+                  : 'border-gray-300 bg-gray-50 text-gray-600 hover:border-amber-300'
               }`}
             >
               <Store size={20} />
@@ -81,7 +100,7 @@ const LoginForm = ({ onLogin }) => {
 
         {/* Email Input (for both buyer and seller) */}
         <div className="space-y-2">
-          <label htmlFor="identifier" className="text-white text-sm font-medium">
+          <label htmlFor="identifier" className="text-gray-700 text-sm font-medium">
             Email Address
           </label>
           <div className="relative">
@@ -93,7 +112,7 @@ const LoginForm = ({ onLogin }) => {
               value={formData.identifier}
               onChange={handleInputChange}
               required
-              className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
               placeholder="Enter your email"
             />
           </div>
@@ -101,7 +120,7 @@ const LoginForm = ({ onLogin }) => {
 
         {/* Phone Input (for both buyer and seller) */}
         <div className="space-y-2">
-          <label htmlFor="phone" className="text-white text-sm font-medium">
+          <label htmlFor="phone" className="text-gray-700 text-sm font-medium">
             Phone Number
           </label>
           <div className="relative">
@@ -113,7 +132,7 @@ const LoginForm = ({ onLogin }) => {
               value={formData.phone}
               onChange={handleInputChange}
               required
-              className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
               placeholder="Enter your phone number"
             />
           </div>
@@ -121,14 +140,14 @@ const LoginForm = ({ onLogin }) => {
 
         {/* Password Input */}
         <div className="space-y-2">
-          <label htmlFor="password" className="text-white text-sm font-medium">
+          <label htmlFor="password" className="text-gray-700 text-sm font-medium">
             Password
           </label>
           <div className="relative">
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -139,16 +158,23 @@ const LoginForm = ({ onLogin }) => {
               value={formData.password}
               onChange={handleInputChange}
               required
-              className="w-full pl-4 pr-12 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full pl-4 pr-12 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
               placeholder="Enter your password"
             />
           </div>
         </div>
 
+        {/* Success Message */}
+        {successMessage && (
+          <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-green-700 text-sm">{successMessage}</p>
+          </div>
+        )}
+
         {/* Error Message */}
         {error && (
-          <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
-            <p className="text-red-300 text-sm">{error}</p>
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700 text-sm">{error}</p>
           </div>
         )}
 
@@ -156,7 +182,7 @@ const LoginForm = ({ onLogin }) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
           {isLoading ? (
             <div className="flex items-center justify-center gap-2">
@@ -170,7 +196,7 @@ const LoginForm = ({ onLogin }) => {
 
         {/* Forgot Password Link */}
         <div className="text-center">
-          <a href="#" className="text-blue-400 hover:text-blue-300 text-sm transition-colors">
+          <a href="#" className="text-orange-600 hover:text-orange-700 text-sm transition-colors">
             Forgot your password?
           </a>
         </div>

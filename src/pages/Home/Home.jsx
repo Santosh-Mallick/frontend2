@@ -1,11 +1,23 @@
-import { ShoppingCart, User } from 'lucide-react';
+import { ShoppingCart, User, LogOut } from 'lucide-react';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import LocationManager from '../../components/LocationManager';
 
 const Home = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated, currentUser, userType, logout, getUserInfo } = useAuth();
+  const userInfo = getUserInfo();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   // Mock seller data (now representing raw material providers)
   const sellers = [
@@ -15,7 +27,8 @@ const Home = () => {
       foodTypes: ['Vegetables', 'Fruits', 'Organic'],
       rating: 4.8,
       isOpen: true,
-      image: 'https://via.placeholder.com/150/8BC34A/FFFFFF?text=Veggies' // Green for fresh produce
+      color: 'bg-green-500',
+      text: 'Veggies'
     },
     {
       id: 2,
@@ -23,7 +36,8 @@ const Home = () => {
       foodTypes: ['Spices', 'Grains', 'Pulses'],
       rating: 4.5,
       isOpen: false, // Could be closed for the day
-      image: 'https://via.placeholder.com/150/FF9800/FFFFFF?text=Spices' // Orange for spices
+      color: 'bg-orange-500',
+      text: 'Spices'
     },
     {
       id: 3,
@@ -31,7 +45,8 @@ const Home = () => {
       foodTypes: ['Milk', 'Cheese', 'Cooking Oil'],
       rating: 4.9,
       isOpen: true,
-      image: 'https://via.placeholder.com/150/B0BEC5/FFFFFF?text=Dairy' // Grey for dairy
+      color: 'bg-gray-500',
+      text: 'Dairy'
     },
     {
       id: 4,
@@ -39,7 +54,8 @@ const Home = () => {
       foodTypes: ['Chicken', 'Mutton', 'Fish'],
       rating: 4.2,
       isOpen: true,
-      image: 'https://via.placeholder.com/150/E57373/FFFFFF?text=Meat' // Red for meat
+      color: 'bg-red-500',
+      text: 'Meat'
     },
     {
       id: 5,
@@ -47,7 +63,8 @@ const Home = () => {
       foodTypes: ['Eco-friendly Bags', 'Containers'],
       rating: 4.6,
       isOpen: false, // Out of stock or closed for maintenance
-      image: 'https://via.placeholder.com/150/4DD0E1/FFFFFF?text=Packaging' // Light blue for packaging
+      color: 'bg-cyan-500',
+      text: 'Packaging'
     },
     {
       id: 6,
@@ -55,7 +72,8 @@ const Home = () => {
       foodTypes: ['Buns', 'Breads', 'Flour'],
       rating: 4.7,
       isOpen: true,
-      image: 'https://via.placeholder.com/150/D4E157/FFFFFF?text=Bakery' // Lime green for bakery
+      color: 'bg-lime-500',
+      text: 'Bakery'
     },
   ];
 
@@ -94,27 +112,87 @@ const Home = () => {
               </button>
               {isProfileDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => setIsProfileDropdownOpen(false)}
-                  >
-                    Sign in as Street Food Seller
-                  </a>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => setIsProfileDropdownOpen(false)}
-                  >
-                    Sign in as Raw Material Provider
-                  </a>
+                  {isAuthenticated ? (
+                    <>
+                      <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
+                        Welcome, {userType === 'buyer' ? userInfo?.name : userInfo?.ownerName || userInfo?.shopName}
+                      </div>
+                      <a
+                        href="#"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => {
+                          setIsProfileDropdownOpen(false);
+                          navigate('/products');
+                        }}
+                      >
+                        View Products
+                      </a>
+                      {userType === 'buyer' && (
+                        <a
+                          href="#"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => {
+                            setIsProfileDropdownOpen(false);
+                            navigate('/buyer/orders');
+                          }}
+                        >
+                          My Orders
+                        </a>
+                      )}
+                      {userType === 'seller' && (
+                        <a
+                          href="#"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => {
+                            setIsProfileDropdownOpen(false);
+                            navigate('/seller/store');
+                          }}
+                        >
+                          My Store
+                        </a>
+                      )}
+                      <button
+                        onClick={() => {
+                          setIsProfileDropdownOpen(false);
+                          handleLogout();
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <a
+                        href="#"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => {
+                          setIsProfileDropdownOpen(false);
+                          navigate('/login');
+                        }}
+                      >
+                        Sign in as Street Food Seller
+                      </a>
+                      <a
+                        href="#"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => {
+                          setIsProfileDropdownOpen(false);
+                          navigate('/login');
+                        }}
+                      >
+                        Sign in as Raw Material Provider
+                      </a>
+                    </>
+                  )}
                 </div>
               )}
             </div>
           </div>
         </div>
       </nav>
-    <LocationManager /> {/* Assuming LocationManager is imported and used here */}
+
+      {isAuthenticated && <LocationManager />}
 
       {/* --- Hero Section --- */}
       <section className="bg-gradient-to-r from-orange-100 to-amber-100 py-16 px-4 md:py-24">
@@ -122,28 +200,62 @@ const Home = () => {
           {/* Left Column: Text Content */}
           <div className="md:w-1/2 text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
-              Connect Directly with Raw Material Suppliers 🤝
+              {isAuthenticated 
+                ? `Welcome back, ${userType === 'buyer' ? userInfo?.name : userInfo?.ownerName || userInfo?.shopName}! 🎉`
+                : 'Connect Directly with Raw Material Suppliers 🤝'
+              }
             </h1>
             <p className="text-lg text-gray-600 mb-8">
-              Street food sellers: Source fresh, quality ingredients. Providers: Expand your reach to local food businesses.
+              {isAuthenticated 
+                ? `Ready to ${userType === 'buyer' ? 'find fresh ingredients' : 'manage your store'}?`
+                : 'Street food sellers: Source fresh, quality ingredients. Providers: Expand your reach to local food businesses.'
+              }
             </p>
             <div className="flex flex-col sm:flex-row justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
-              <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 flex items-center justify-center">
-                <span className="mr-2">🛒</span> Find Suppliers
-              </button>
-              <button className="bg-transparent border-2 border-orange-500 text-orange-600 hover:bg-orange-50 hover:text-orange-700 font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 flex items-center justify-center">
-                <span className="mr-2">📦</span> List Your Products
-              </button>
+              {isAuthenticated ? (
+                <>
+                  <button 
+                    onClick={() => navigate('/products')}
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 flex items-center justify-center"
+                  >
+                    <span className="mr-2">🛒</span> Browse Products
+                  </button>
+                  {userType === 'seller' && (
+                    <button 
+                      onClick={() => navigate('/seller/store')}
+                      className="bg-transparent border-2 border-orange-500 text-orange-600 hover:bg-orange-50 hover:text-orange-700 font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 flex items-center justify-center"
+                    >
+                      <span className="mr-2">🏪</span> Manage Store
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => navigate('/login')}
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 flex items-center justify-center"
+                  >
+                    <span className="mr-2">🛒</span> Find Suppliers
+                  </button>
+                  <button 
+                    onClick={() => navigate('/login')}
+                    className="bg-transparent border-2 border-orange-500 text-orange-600 hover:bg-orange-50 hover:text-orange-700 font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 flex items-center justify-center"
+                  >
+                    <span className="mr-2">📦</span> List Your Products
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
           {/* Right Column: Illustration/Image */}
           <div className="md:w-1/2 flex justify-center md:justify-end">
-            <img
-              src="https://via.placeholder.com/600x400/FFCC80/8B4513?text=Supplier+to+Seller+Connect" // Changed placeholder text
-              alt="Supplier to Seller Connection Illustration"
-              className="max-w-full h-auto rounded-lg shadow-xl"
-            />
+            <div className="w-full max-w-md h-64 bg-gradient-to-br from-orange-200 to-amber-200 rounded-lg shadow-xl flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-6xl mb-4">🤝</div>
+                <p className="text-lg font-semibold text-gray-700">Supplier to Seller Connection</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -155,16 +267,25 @@ const Home = () => {
             Top Raw Material Providers for You 🥕
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {sellers.map((seller) => ( // Renamed 'sellers' to 'providers' for clarity in actual use
+            {sellers.map((seller) => (
               <div
                 key={seller.id}
                 className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 cursor-pointer border border-gray-100"
               >
-                <img
-                  src={seller.image}
-                  alt={seller.name}
-                  className="w-full h-48 object-cover"
-                />
+                {/* Replace image with colored div */}
+                <div className={`w-full h-48 ${seller.color} flex items-center justify-center`}>
+                  <div className="text-center text-white">
+                    <div className="text-4xl mb-2">
+                      {seller.text === 'Veggies' && '🥕'}
+                      {seller.text === 'Spices' && '🌶️'}
+                      {seller.text === 'Dairy' && '🥛'}
+                      {seller.text === 'Meat' && '🍖'}
+                      {seller.text === 'Packaging' && '📦'}
+                      {seller.text === 'Bakery' && '🥖'}
+                    </div>
+                    <p className="text-xl font-bold">{seller.text}</p>
+                  </div>
+                </div>
                 <div className="p-5">
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">{seller.name}</h3>
                   <div className="flex flex-wrap gap-2 mb-3">
