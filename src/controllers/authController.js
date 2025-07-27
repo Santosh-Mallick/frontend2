@@ -11,15 +11,15 @@ class AuthController {
 
   // Initialize authentication state
   init() {
-    console.log('AuthController - Initializing auth state');
+    // console.log('AuthController - Initializing auth state');
     
     this.isAuthenticated = authService.isAuthenticated();
     this.currentUser = authService.getCurrentUser();
     this.userType = authService.getUserType();
     
-    console.log('AuthController - Init - isAuthenticated:', this.isAuthenticated);
-    console.log('AuthController - Init - currentUser:', this.currentUser);
-    console.log('AuthController - Init - userType from localStorage:', this.userType);
+    // console.log('AuthController - Init - isAuthenticated:', this.isAuthenticated);
+    // console.log('AuthController - Init - currentUser:', this.currentUser);
+    // console.log('AuthController - Init - userType from localStorage:', this.userType);
     
     // Only set as authenticated if we have both token and user data
     if (this.isAuthenticated && !this.currentUser) {
@@ -28,7 +28,7 @@ class AuthController {
       authService.logout();
     }
     
-    console.log('AuthController - Init - Final userType:', this.userType);
+    // console.log('AuthController - Init - Final userType:', this.userType);
     this.notifyListeners();
   }
 
@@ -66,20 +66,20 @@ class AuthController {
   // Register user
   async register(userData, userType) {
     try {
-      console.log('AuthController - Register called with userType:', userType);
-      console.log('AuthController - UserData:', userData);
+      // console.log('AuthController - Register called with userType:', userType);
+      // console.log('AuthController - UserData:', userData);
       
       const result = await authService.register(userData, userType);
       
-      console.log('AuthController - AuthService result:', result);
+      // console.log('AuthController - AuthService result:', result);
       
       if (result.success) {
         this.isAuthenticated = true;
         this.currentUser = result.user;
         this.userType = userType;
         
-        console.log('AuthController - Setting userType to:', userType);
-        console.log('AuthController - Current userType after setting:', this.userType);
+        // console.log('AuthController - Setting userType to:', userType);
+        // console.log('AuthController - Current userType after setting:', this.userType);
         
         this.notifyListeners();
         
@@ -95,7 +95,7 @@ class AuthController {
         };
       }
     } catch (error) {
-      console.error('Registration error:', error);
+      // console.error('Registration error:', error);
       return {
         success: false,
         message: 'An error occurred during registration. Please try again.'
@@ -117,7 +117,7 @@ class AuthController {
         message: 'Successfully logged out'
       };
     } catch (error) {
-      console.error('Logout error:', error);
+      // console.error('Logout error:', error);
       return {
         success: false,
         message: 'An error occurred during logout.'

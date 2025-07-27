@@ -79,7 +79,7 @@ const LocationManager = () => {
 
       if (data.status.code === 200 && data.results.length > 0) {
         const components = data.results[0].components;
-        console.log(components);
+        // console.log(components);
         setCity(components.city || components.town || components.village || "N/A");
         console.log(city);
         setState(components.state || "N/A");
@@ -87,7 +87,7 @@ const LocationManager = () => {
         setDistrict(components.state_district || "N/A");
       } else {
         const geoApiError = `Geocoding failed: ${data.status.message || "Unknown error"}`;
-        console.error(geoApiError, data.status);
+        // console.error(geoApiError, data.status);
         setError(geoApiError);
       }
     } catch (err) {

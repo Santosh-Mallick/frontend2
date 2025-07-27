@@ -1,14 +1,19 @@
-import { ShoppingCart, User, LogOut, Store, ShoppingBag, TrendingUp, Users, Shield } from 'lucide-react';
-import React, { useState } from 'react';
+import { ShoppingCart, User, LogOut, Store, ShoppingBag, TrendingUp, Users, Shield, MapPin } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import LocationManager from '../../components/LocationManager';
+import LocationManager from '../../components/LocationManager'; // Assuming this component saves location to local storage
 
 const Home = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated, currentUser, userType, logout, getUserInfo } = useAuth();
   const userInfo = getUserInfo();
+
+  // New states for closest sellers data
+  const [closestSellers, setClosestSellers] = useState([]);
+  const [loadingClosestSellers, setLoadingClosestSellers] = useState(true);
+  const [errorClosestSellers, setErrorClosestSellers] = useState(null);
 
   const handleLogout = async () => {
     try {
@@ -19,8 +24,8 @@ const Home = () => {
     }
   };
 
-  // Mock supplier data (representing raw material providers)
-  const suppliers = [
+  // Mock supplier data (for Featured Suppliers section)
+  const featuredSuppliers = [
     {
       id: 1,
       name: "Fresh Harvest Co.",
@@ -106,6 +111,86 @@ const Home = () => {
       description: "Connect with verified and trusted suppliers"
     }
   ];
+
+  // Fetch the closest suppliers
+  const fetchClosestSuppliers = async (lat, lng, productName = '', maxDistanceKm = 35) => {
+    setLoadingClosestSellers(true);
+    setErrorClosestSellers(null);
+    try {
+      const payload = {
+        buyerLat: lat,
+        buyerLon: lng,
+        productName: productName,
+        MAX_DISTANCE_KM: maxDistanceKm
+      };
+
+      const res = await fetch('http://localhost:5000/api/buyer/find-closest-sellers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${currentUser?.token}` // Assuming currentUser is in scope
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Failed to fetch closest suppliers');
+      }
+
+      const data = await res.json();
+      console.log('Closest suppliers data:', data);
+      return data; // Return the parsed JSON data
+
+    } catch (error) {
+      console.error('Network or other error:', error);
+      setErrorClosestSellers(error.message || 'Failed to load suppliers.');
+      return null;
+    } finally {
+      setLoadingClosestSellers(false);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch closest suppliers when the component mounts or user location changes
+    const storedLocation = localStorage.getItem('userLocation');
+    if (storedLocation) {
+      try {
+        // Changed here ------------->
+        // const parsedLocation = JSON.parse(storedLocation);
+        // const { lat, lng } = parsedLocation;
+        // const {22.740227, 86.200408} = parsed
+        const lat = 22.740227; // Replace with actual latitude from parsedLocation
+        const lng = 86.200408; // Replace with actual longitude from parsedLocation
+
+        if (lat && lng) {
+          fetchClosestSuppliers(lat, lng)
+            .then(data => {
+              if (data && data.allSellersWithinRange) {
+                setClosestSellers(data.allSellersWithinRange);
+                console.log("Closest suppliers found:", data.allSellersWithinRange);
+              } else if (data && data.closestSeller && data.allSellersBeyondRange) {
+                // If no sellers within range but some beyond, you might want to show them
+                // Or inform the user. For simplicity, we'll just log here.
+                console.log("No sellers within range, but some beyond:", data.allSellersBeyondRange);
+              } else {
+                 setClosestSellers([]); // No sellers found at all
+              }
+            })
+            .catch(error => {
+              console.error('Error in useEffect fetching closest suppliers:', error);
+            });
+        }
+      } catch (e) {
+        console.error("Failed to parse user location from localStorage:", e);
+        setErrorClosestSellers("Failed to load user location. Please set your location.");
+        setLoadingClosestSellers(false);
+      }
+    } else {
+        setLoadingClosestSellers(false); // No stored location, so stop loading
+        setErrorClosestSellers("No user location found. Please set your location to find nearby suppliers.");
+    }
+  }, [currentUser?.token]); // Re-fetch if currentUser token changes
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -227,6 +312,7 @@ const Home = () => {
         </div>
       </nav>
 
+      {/* Renders LocationManager to update userLocation in localStorage */}
       <LocationManager />
 
       {/* --- Hero Section --- */}
@@ -245,7 +331,7 @@ const Home = () => {
                 ? userType === 'buyer'
                   ? 'Discover fresh, quality ingredients for your food business. Connect with trusted suppliers and grow your enterprise.'
                   : 'Manage your store efficiently and connect with food sellers. Expand your reach and boost your business.'
-                : 'Food sellers: Source premium ingredients. Suppliers: Reach more customers. Together, we build successful businesses.'
+                : 'Food sellers: Source premium ingredients. Suppliers: Reach more customers. Together, we build successful partnerships.'
               }
             </p>
             <div className="flex flex-col sm:flex-row justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
@@ -298,6 +384,76 @@ const Home = () => {
         </div>
       </section>
 
+      {/* --- Closest Suppliers Near You Section (NEW) --- */}
+      {userType === 'buyer' && ( // Only show for buyers
+        <section className="py-16 px-4 bg-gray-100">
+          <div className="container mx-auto">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">
+              Closest Suppliers Near You <MapPin className="inline-block ml-2 text-blue-600" size={28}/>
+            </h2>
+            <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+              Based on your location, here are the raw material suppliers closest to you.
+            </p>
+
+            {loadingClosestSellers ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent mx-auto mb-4"></div>
+                <p className="text-gray-600">Finding closest suppliers...</p>
+              </div>
+            ) : errorClosestSellers ? (
+              <div className="text-center py-8 text-red-600 font-medium">
+                <p>Error: {errorClosestSellers}</p>
+                <p>Please ensure your location is set and try again.</p>
+              </div>
+            ) : closestSellers.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {closestSellers.map((sellerItem, index) => (
+                  <div
+                    key={sellerItem.id || index} // Use seller's actual _id if available, or index as fallback
+                    className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 cursor-pointer border border-gray-100"
+                  >
+                    <div className="p-5">
+                      <h3 className="text-xl font-semibold text-gray-800 mb-2">{sellerItem.name}</h3>
+                      <p className="text-gray-600 text-sm mb-3">
+                        Contact Number : <span className="font-semibold text-orange-600">{sellerItem.phone}</span>
+                      </p>
+                      <p className="text-gray-600 text-sm mb-3">
+                        Distance: <span className="font-semibold text-orange-600">{sellerItem.distance_km} km</span>
+                      </p>
+                      {/* {sellerItem.products && sellerItem.products.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          <span className="text-gray-700 text-sm font-medium">Products:</span>
+                          {sellerItem.products.map((product, pIndex) => (
+                            <span
+                              key={pIndex}
+                              className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                            >
+                              {product}
+                            </span>
+                          ))}
+                        </div>
+                      )} */}
+                      <button
+                        className="w-full py-2 rounded-md font-semibold text-white bg-blue-500 hover:bg-blue-600 transition duration-300 mt-4"
+                        onClick={() => navigate(`/buyer/s/${sellerItem.id}`)} // Link to seller's detailed page
+                      >
+                        View Seller
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-600 font-medium">
+                <p>No sellers found within your current range.</p>
+                <p>Try adjusting your location or search for specific products.</p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+
       {/* --- Features Section --- */}
       <section className="py-16 px-4 bg-white">
         <div className="container mx-auto">
@@ -322,7 +478,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* --- Top Suppliers Section --- */}
+      {/* --- Top Suppliers Section (renamed to Featured Suppliers to avoid confusion with dynamic data) --- */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">
@@ -332,7 +488,7 @@ const Home = () => {
             Connect with trusted suppliers offering quality ingredients and reliable service
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {suppliers.map((supplier) => (
+            {featuredSuppliers.map((supplier) => (
               <div
                 key={supplier.id}
                 className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 cursor-pointer border border-gray-100"
@@ -363,17 +519,6 @@ const Home = () => {
                         {category}
                       </span>
                     ))}
-                  </div>
-                  <div className="flex items-center mb-3">
-                    <span className="text-yellow-500 flex items-center mr-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.92 8.727c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                      {supplier.rating}
-                    </span>
-                    <span className="bg-green-100 text-green-800 text-sm font-semibold px-2 py-0.5 rounded-full">
-                      Available
-                    </span>
                   </div>
                   <button
                     className="w-full py-2 rounded-md font-semibold text-white bg-orange-500 hover:bg-orange-600 transition duration-300"
