@@ -7,6 +7,7 @@ import ProductList from './pages/Home/Items';
 import SellerDashboard from './pages/Seller/SellerDashboard';
 import { useAuth } from './hooks/useAuth';
 import { config } from './config/env.js';
+import AddProductPage from './pages/Seller/AddProduct.jsx';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, userType = null }) => {
@@ -211,6 +212,17 @@ const App = () => {
                 </AuthenticatedLayout>
               </ProtectedRoute>
             } 
+          />
+
+          <Route
+            path="/seller/products/add" 
+            element={
+              <ProtectedRoute userType="seller">
+                <AuthenticatedLayout>
+                  <AddProductPage />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
           />
           
           <Route 
