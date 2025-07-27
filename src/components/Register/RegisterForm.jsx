@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye, EyeOff, User, ShoppingBag, Store, Phone, Mail, MapPin, Building, X } from 'lucide-react';
+import { Eye, EyeOff, User, ShoppingBag, Store, Phone, Mail, MapPin, Building, X, Edit, Globe } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { LocationPicker } from '../Other/LocationPicker';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
     password: '',
     confirmPassword: '',
     address: {
-      line: '',
+      line: '', // Added for string address
       locality: '',
       city: '',
       pincode: '',
@@ -41,6 +41,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
   const [error, setError] = useState('');
   const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [manualLocationInput, setManualLocationInput] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -50,7 +51,9 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
         ...prev,
         [parent]: {
           ...prev[parent],
-          [child]: value
+          [child]: (parent === 'location' && (child === 'lat' || child === 'lng'))
+            ? (value === '' ? '' : parseFloat(value) || 0)
+            : value
         }
       }));
     } else {
@@ -106,6 +109,11 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
         setIsLoading(false);
         return;
       }
+      if (formData.location.lat === 0 && formData.location.lng === 0) {
+        setError('Shop location is required for sellers. Please select on map or enter manually.');
+        setIsLoading(false);
+        return;
+      }
     }
 
     try {
@@ -114,10 +122,10 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
         name: formData.name,
         phone: formData.phone,
         password: formData.password,
-        address: formData.address,
+        address: formData.address, // Now includes the 'line' property
         location: {
           type: "Point",
-          coordinates: [0, 0] // Default coordinates - should be updated with actual location
+          coordinates: [formData.location.lng, formData.location.lat]
         }
       };
 
@@ -128,7 +136,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
         userData.email = formData.email;
         userData.ownerName = formData.ownerName;
         userData.products = formData.products;
-        userData.fssaiNumber = formData.fssaiNumber; // Now required, so always include
+        userData.fssaiNumber = formData.fssaiNumber;
         userData.shopPhoto = formData.shopPhoto;
         userData.bannerImage = formData.bannerImage;
         userData.paymentInfo = formData.paymentInfo;
@@ -138,18 +146,16 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
       console.log('Registration - User Type being sent:', formData.userType);
 
       const result = await register(userData, formData.userType);
-      
+
       console.log('Registration - Result:', result);
-      
+
       if (result.success) {
-        // Show success message
-        const message = formData.userType === 'buyer' 
+        const message = formData.userType === 'buyer'
           ? `Welcome, ${formData.name}! Your account has been created successfully.`
           : `Welcome, ${formData.ownerName}! Your store has been created successfully.`;
-        
+
         setSuccessMessage(message);
-        
-        // Navigate based on user type
+
         setTimeout(() => {
           console.log('Registration - Navigating to:', formData.userType === 'seller' ? '/seller/dashboard' : '/');
           if (formData.userType === 'seller') {
@@ -158,7 +164,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
             navigate('/');
           }
         }, 1500);
-        
+
         onRegister(formData);
       } else {
         setError(result.message);
@@ -201,13 +207,12 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
               <span className="font-medium">Seller</span>
             </button>
           </div>
-          {/* Visual indicator of selected userType */}
           <div className="text-center">
             <span className={`text-sm font-medium px-3 py-1 rounded-full ${
-              formData.userType === 'buyer' 
-                ? 'bg-orange-100 text-orange-700' 
+              formData.userType === 'buyer'
+                ? 'bg-orange-100 text-orange-700'
                 : 'bg-amber-100 text-amber-700'
-            }`}>
+              }`}>
               Currently selected: {formData.userType === 'buyer' ? 'Buyer' : 'Seller'}
             </span>
           </div>
@@ -253,20 +258,78 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Location Of Shop *</label>
+            {/* Location Input Method Toggle */}
+            <div className="flex items-center justify-between mt-4">
+              <label className="block text-sm font-medium text-gray-700">Location Of Shop *</label>
               <button
                 type="button"
-                onClick={() => setIsLocationPickerOpen(true)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-left text-gray-600 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flex items-center gap-2"
-                // disabled={isSubmitting}
+                onClick={() => setManualLocationInput(!manualLocationInput)}
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
               >
-                <MapPin className="w-4 h-4" />
-                {formData.location.lat === 0 && formData.location.lng === 0
-                  ? "Select Location"
-                  : `Lat: ${formData.location.lat.toFixed(4)}, Lng: ${formData.location.lng.toFixed(4)}`}
+                {manualLocationInput ? (
+                  <>
+                    <MapPin size={16} /> Select on Map
+                  </>
+                ) : (
+                  <>
+                    <Edit size={16} /> Enter Manually
+                  </>
+                )}
               </button>
             </div>
+
+            {/* Conditional Location Input */}
+            {manualLocationInput ? (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label htmlFor="lat" className="text-gray-700 text-xs font-medium">Latitude</label>
+                  <div className="relative">
+                    <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                      type="number"
+                      id="lat"
+                      name="location.lat"
+                      value={formData.location.lat === 0 && formData.location.lat !== '' ? '' : formData.location.lat}
+                      onChange={handleInputChange}
+                      required
+                      step="any"
+                      className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                      placeholder="e.g., 22.8046"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label htmlFor="lng" className="text-gray-700 text-xs font-medium">Longitude</label>
+                  <div className="relative">
+                    <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                      type="number"
+                      id="lng"
+                      name="location.lng"
+                      value={formData.location.lng === 0 && formData.location.lng !== '' ? '' : formData.location.lng}
+                      onChange={handleInputChange}
+                      required
+                      step="any"
+                      className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                      placeholder="e.g., 86.2029"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setIsLocationPickerOpen(true)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-left text-gray-600 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flex items-center gap-2"
+                >
+                  <MapPin className="w-4 h-4" />
+                  {formData.location.lat === 0 && formData.location.lng === 0
+                    ? "Select Location on Map"
+                    : `Lat: ${formData.location.lat.toFixed(4)}, Lng: ${formData.location.lng.toFixed(4)}`}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -295,6 +358,26 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
             </div>
           </div>
         )}
+
+        {/* Address Line Input (New) */}
+        <div className="space-y-2">
+          <label htmlFor="addressLine" className="text-gray-700 text-sm font-medium">
+            Address Line
+          </label>
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <input
+              type="text"
+              id="addressLine"
+              name="address.line" // Set name for nested property
+              value={formData.address.line}
+              onChange={handleInputChange}
+              required
+              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+              placeholder="Enter your street address, house number, etc."
+            />
+          </div>
+        </div>
 
         {/* FSSAI Number (Seller only) */}
         {formData.userType === 'seller' && (
@@ -437,7 +520,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
               Creating account...
             </div>
           ) : (
-            `Register as ${formData.userType}`
+            `Register as ${formData.userType === 'buyer' ? 'Buyer' : 'Seller'}`
           )}
         </button>
 
@@ -459,4 +542,4 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
   );
 };
 
-export default RegisterForm; 
+export default RegisterForm;

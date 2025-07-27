@@ -1,7 +1,7 @@
 // Environment Configuration
 export const config = {
   // API Configuration
-  API_URL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  API_URL: 'http://localhost:5000/api',
   
   // App Configuration
   APP_NAME: import.meta.env.VITE_APP_NAME || 'MarketPlace',
