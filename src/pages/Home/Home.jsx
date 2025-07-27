@@ -128,7 +128,8 @@ const Home = () => {
           {/* Right-aligned Icons */}
           <div className="flex items-center space-x-4 relative">
             {/* Notification Bell */}
-            <button className="text-gray-600 hover:text-orange-500 focus:outline-none">
+            <button className="text-gray-600 hover:text-orange-500 focus:outline-none cursor-pointer"
+            onClick={() => navigate("/buyer/cart")}>
                 <ShoppingCart />
             </button>
 
@@ -136,7 +137,7 @@ const Home = () => {
             <div className="relative">
               <button
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                className="flex items-center space-x-2 focus:outline-none"
+                className="flex items-center space-x-2 focus:outline-none cursor-pointer"
               >
                 <User />
               </button>

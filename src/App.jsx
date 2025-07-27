@@ -8,28 +8,29 @@ import SellerDashboard from './pages/Seller/SellerDashboard';
 import { useAuth } from './hooks/useAuth';
 import { config } from './config/env.js';
 import AddProductPage from './pages/Seller/AddProduct.jsx';
+import ShoppingCartPage from './pages/Home/Cart.jsx';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, userType = null }) => {
   const { isAuthenticated, currentUser, userType: authUserType } = useAuth();
-  
+
   console.log('ProtectedRoute - Checking access:');
   console.log('ProtectedRoute - Required userType:', userType);
   console.log('ProtectedRoute - Auth userType:', authUserType);
   console.log('ProtectedRoute - isAuthenticated:', isAuthenticated);
   console.log('ProtectedRoute - currentUser:', currentUser);
-  
+
   if (!isAuthenticated || !currentUser) {
     console.log('ProtectedRoute - Redirecting to login (not authenticated)');
     return <Navigate to="/login" replace />;
   }
-  
+
   if (userType && authUserType !== userType) {
     console.log('ProtectedRoute - Redirecting to home (wrong user type)');
     console.log('ProtectedRoute - Expected:', userType, 'Got:', authUserType);
     return <Navigate to="/" replace />;
   }
-  
+
   console.log('ProtectedRoute - Access granted');
   return children;
 };
@@ -37,11 +38,11 @@ const ProtectedRoute = ({ children, userType = null }) => {
 // Public Route Component (redirects to home if already authenticated)
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, currentUser } = useAuth();
-  
+
   if (isAuthenticated && currentUser) {
     return <Navigate to="/" replace />;
   }
-  
+
   return children;
 };
 
@@ -72,7 +73,7 @@ const App = () => {
         setIsLoading(false);
       }
     };
-    
+
     checkAuth();
   }, [isAuthenticated, currentUser]);
 
@@ -101,7 +102,7 @@ const App = () => {
             <div className="relative">
               {/* Main loading spinner */}
               <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
-              
+
               {/* Floating elements around the spinner */}
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                 <div className="w-4 h-4 bg-orange-400 rounded-full animate-pulse"></div>
@@ -141,18 +142,18 @@ const App = () => {
       <Router>
         <Routes>
           {/* Public Routes */}
-          <Route 
-            path="/login" 
+          <Route
+            path="/login"
             element={
               <PublicRoute>
                 <LoginPage />
               </PublicRoute>
-            } 
+            }
           />
 
           {/* Home page - accessible to everyone */}
-          <Route 
-            path="/" 
+          <Route
+            path="/"
             element={
               isAuthenticated ? (
                 <AuthenticatedLayout>
@@ -161,24 +162,24 @@ const App = () => {
               ) : (
                 <Home />
               )
-            } 
+            }
           />
 
           {/* Protected Routes */}
-          <Route 
-            path="/products" 
+          <Route
+            path="/products"
             element={
               <ProtectedRoute>
                 <AuthenticatedLayout>
                   <ProductList />
                 </AuthenticatedLayout>
               </ProtectedRoute>
-            } 
+            }
           />
 
           {/* Buyer-specific routes */}
-          <Route 
-            path="/buyer/*" 
+          <Route
+            path="/buyer/*"
             element={
               <ProtectedRoute userType="buyer">
                 <AuthenticatedLayout>
@@ -188,34 +189,45 @@ const App = () => {
                   </div>
                 </AuthenticatedLayout>
               </ProtectedRoute>
-            } 
-          />
-
-          {/* Seller-specific routes */}
-          <Route 
-            path="/seller/dashboard" 
-            element={
-              <ProtectedRoute userType="seller">
-                <AuthenticatedLayout>
-                  <SellerDashboard />
-                </AuthenticatedLayout>
-              </ProtectedRoute>
-            } 
-          />
-          
-          <Route 
-            path="/seller/store" 
-            element={
-              <ProtectedRoute userType="seller">
-                <AuthenticatedLayout>
-                  <SellerDashboard />
-                </AuthenticatedLayout>
-              </ProtectedRoute>
-            } 
+            }
           />
 
           <Route
-            path="/seller/products/add" 
+            path="/buyer/cart"
+            element={
+              <ProtectedRoute userType="buyer">
+                <AuthenticatedLayout>
+                  <ShoppingCartPage />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Seller-specific routes */}
+          <Route
+            path="/seller/dashboard"
+            element={
+              <ProtectedRoute userType="seller">
+                <AuthenticatedLayout>
+                  <SellerDashboard />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/seller/store"
+            element={
+              <ProtectedRoute userType="seller">
+                <AuthenticatedLayout>
+                  <SellerDashboard />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/seller/products/add"
             element={
               <ProtectedRoute userType="seller">
                 <AuthenticatedLayout>
@@ -224,22 +236,22 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          
-          <Route 
-            path="/seller/*" 
+
+          <Route
+            path="/seller/*"
             element={
               <ProtectedRoute userType="seller">
                 <AuthenticatedLayout>
                   <SellerDashboard />
                 </AuthenticatedLayout>
               </ProtectedRoute>
-            } 
+            }
           />
 
           {/* Default redirect */}
-          <Route 
-            path="*" 
-            element={<Navigate to="/" replace />} 
+          <Route
+            path="*"
+            element={<Navigate to="/" replace />}
           />
         </Routes>
       </Router>
