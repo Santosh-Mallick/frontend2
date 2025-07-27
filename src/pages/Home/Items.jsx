@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useCart } from '../../context/CartContext';
 
 const ProductList = () => {
   const navigate = useNavigate(); // Initialize useNavigate hook
+  const { addToCart, updateQuantity, items: cartItems, totalItems } = useCart();
 
   // Mock product data for the 'Vegetables and Fruits' category
   const [products, setProducts] = useState([
@@ -12,7 +14,7 @@ const ProductList = () => {
       price: 30, // Price per kg/unit
       unit: 'kg',
       image: 'https://via.placeholder.com/150/FF6347/FFFFFF?text=Tomatoes',
-      quantity: 0, // Current quantity in cart
+      isEcoFriendly: false,
     },
     {
       id: 2,
@@ -20,7 +22,7 @@ const ProductList = () => {
       price: 20,
       unit: 'bunch',
       image: 'https://via.placeholder.com/150/66BB6A/FFFFFF?text=Spinach',
-      quantity: 0,
+      isEcoFriendly: false,
     },
     {
       id: 3,
@@ -28,7 +30,7 @@ const ProductList = () => {
       price: 120,
       unit: 'kg',
       image: 'https://via.placeholder.com/150/FFB74D/FFFFFF?text=Apples',
-      quantity: 0,
+      isEcoFriendly: false,
     },
     {
       id: 4,
@@ -36,7 +38,7 @@ const ProductList = () => {
       price: 25,
       unit: 'kg',
       image: 'https://via.placeholder.com/150/BDBDBD/FFFFFF?text=Potatoes',
-      quantity: 0,
+      isEcoFriendly: false,
     },
     {
       id: 5,
@@ -44,7 +46,7 @@ const ProductList = () => {
       price: 45,
       unit: 'piece',
       image: 'https://via.placeholder.com/150/8BC34A/FFFFFF?text=Bell+Peppers',
-      quantity: 0,
+      isEcoFriendly: false,
     },
     {
       id: 6,
@@ -52,30 +54,36 @@ const ProductList = () => {
       price: 60,
       unit: 'dozen',
       image: 'https://via.placeholder.com/150/FFF176/FFFFFF?text=Bananas',
-      quantity: 0,
+      isEcoFriendly: false,
+    },
+    {
+      id: 7,
+      name: '🌱 Eco-Friendly Bags (Pack of 50)',
+      price: 50, // Price for pack of 50
+      unit: 'pack',
+      image: 'https://via.placeholder.com/150/4CAF50/FFFFFF?text=Eco+Bags+50',
+      isEcoFriendly: true,
+      description: 'Official eco-friendly bags provided by our application. Pack of 50 bags.',
+      isOfficialProduct: true,
     },
   ]);
 
-  const handleAddToCart = (id) => {
-    setProducts((prevProducts) =>
-      prevProducts.map((product) =>
-        product.id === id ? { ...product, quantity: product.quantity + 1 } : product
-      )
-    );
+  const handleAddToCart = (product) => {
+    addToCart(product);
   };
 
-  const handleSubtractFromCart = (id) => {
-    setProducts((prevProducts) =>
-      prevProducts.map((product) =>
-        product.id === id && product.quantity > 0
-          ? { ...product, quantity: product.quantity - 1 }
-          : product
-      )
-    );
+  const handleSubtractFromCart = (productId) => {
+    const cartItem = cartItems.find(item => item.id === productId);
+    if (cartItem) {
+      updateQuantity(productId, cartItem.quantity - 1);
+    }
   };
 
-  // Calculate total items in cart for the 'Go to Cart' button
-  const totalItemsInCart = products.reduce((total, product) => total + product.quantity, 0);
+  // Get quantity for a specific product from cart
+  const getProductQuantity = (productId) => {
+    const cartItem = cartItems.find(item => item.id === productId);
+    return cartItem ? cartItem.quantity : 0;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 font-sans">
@@ -124,13 +132,20 @@ const ProductList = () => {
                 </p>
               </div>
 
+              {/* Eco-friendly badge */}
+              {product.isEcoFriendly && (
+                <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                  🌱 Eco
+                </div>
+              )}
+
               {/* Quantity Selector */}
               <div className="flex items-center justify-center space-x-3 mt-auto">
                 <button
                   onClick={() => handleSubtractFromCart(product.id)}
-                  disabled={product.quantity === 0}
+                  disabled={getProductQuantity(product.id) === 0}
                   className={`px-3 py-1 rounded-full font-bold text-lg transition duration-300 ${
-                    product.quantity === 0
+                    getProductQuantity(product.id) === 0
                       ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                       : 'bg-orange-100 text-orange-600 hover:bg-orange-200'
                   }`}
@@ -138,10 +153,10 @@ const ProductList = () => {
                   -
                 </button>
                 <span className="text-xl font-bold text-gray-800 w-8 text-center">
-                  {product.quantity}
+                  {getProductQuantity(product.id)}
                 </span>
                 <button
-                  onClick={() => handleAddToCart(product.id)}
+                  onClick={() => handleAddToCart(product)}
                   className="px-3 py-1 rounded-full bg-orange-500 text-white font-bold text-lg hover:bg-orange-600 transition duration-300"
                 >
                   +
@@ -155,8 +170,13 @@ const ProductList = () => {
       {/* Fixed "Go to Cart" button */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-orange-600 text-white shadow-lg text-center">
         <button
-          className="bg-white text-orange-600 py-3 px-8 rounded-full font-bold text-lg shadow-xl hover:bg-gray-100 transition duration-300 flex items-center justify-center mx-auto"
-          disabled={totalItemsInCart === 0}
+          onClick={() => navigate('/buyer/cart')}
+          className={`py-3 px-8 rounded-full font-bold text-lg shadow-xl transition duration-300 flex items-center justify-center mx-auto ${
+            totalItems === 0
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-white text-orange-600 hover:bg-gray-100'
+          }`}
+          disabled={totalItems === 0}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -172,7 +192,7 @@ const ProductList = () => {
               d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.182 1.769.941 1.769H19a2 2 0 002-2v-1a2 2 0 00-2-2H8.5L7 13z"
             />
           </svg>
-          Go to Cart ({totalItemsInCart} Items)
+          {totalItems === 0 ? 'Cart Empty' : `Go to Cart (${totalItems} Items)`}
         </button>
       </div>
     </div>

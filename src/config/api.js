@@ -14,6 +14,13 @@ export const API_ENDPOINTS = {
   
   // Map endpoints
   MAP_ROUTES: `${API_BASE_URL}/api/map`,
+  
+  // Buyer endpoints
+  PLACE_ORDER: `${API_BASE_URL}/api/buyer/place-order`,
+  CANCEL_ORDER: `${API_BASE_URL}/api/buyer/cancel-order`,
+  GET_CREDIT_WALLET: `${API_BASE_URL}/api/buyer/credit-wallet`,
+  APPLY_CREDIT_POINTS: `${API_BASE_URL}/api/buyer/apply-credit-points`,
 };
 
+export { API_BASE_URL };
 export default API_BASE_URL; 

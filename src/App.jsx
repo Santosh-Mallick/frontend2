@@ -11,6 +11,7 @@ import AddProductPage from './pages/Seller/AddProduct.jsx';
 import ShoppingCartPage from './pages/Home/Cart.jsx';
 import MyOrders from './pages/Buyer/MyOrders.jsx';
 import ProductManagement from './pages/Seller/ProductManagement.jsx';
+import { CartProvider } from './context/CartContext';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, userType = null }) => {
@@ -142,7 +143,8 @@ const App = () => {
     <>
       <ServerStatus />
       <Router>
-        <Routes>
+        <CartProvider>
+          <Routes>
           {/* Public Routes */}
           <Route
             path="/login"
@@ -264,6 +266,7 @@ const App = () => {
             element={<Navigate to="/" replace />}
           />
         </Routes>
+        </CartProvider>
       </Router>
     </>
   );
