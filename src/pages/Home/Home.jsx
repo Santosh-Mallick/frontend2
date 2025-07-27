@@ -128,10 +128,14 @@ const Home = () => {
           {/* Right-aligned Icons */}
           <div className="flex items-center space-x-4 relative">
             {/* Notification Bell */}
-            <button className="text-gray-600 hover:text-orange-500 focus:outline-none cursor-pointer"
-            onClick={() => navigate("/buyer/cart")}>
-                <ShoppingCart />
-            </button>
+            {
+              userType === 'buyer' && (
+                <button className="text-gray-600 hover:text-orange-500 focus:outline-none cursor-pointer"
+                  onClick={() => navigate("/buyer/cart")}>
+                  <ShoppingCart />
+                </button>
+              )
+            }
 
             {/* Profile Avatar with Dropdown */}
             <div className="relative">
@@ -164,7 +168,7 @@ const Home = () => {
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => {
                             setIsProfileDropdownOpen(false);
-                            navigate('/buyer/orders');
+                            navigate('/buyer/myOrders');
                           }}
                         >
                           My Orders
@@ -231,14 +235,14 @@ const Home = () => {
           {/* Left Column: Text Content */}
           <div className="md:w-1/2 text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
-              {isAuthenticated 
+              {isAuthenticated
                 ? `Welcome back, ${userType === 'buyer' ? userInfo?.name : userInfo?.ownerName || userInfo?.shopName}! 🎉`
                 : 'Your Gateway to Quality Ingredients & Business Growth 🚀'
               }
             </h1>
             <p className="text-lg text-gray-600 mb-8">
-              {isAuthenticated 
-                ? userType === 'buyer' 
+              {isAuthenticated
+                ? userType === 'buyer'
                   ? 'Discover fresh, quality ingredients for your food business. Connect with trusted suppliers and grow your enterprise.'
                   : 'Manage your store efficiently and connect with food sellers. Expand your reach and boost your business.'
                 : 'Food sellers: Source premium ingredients. Suppliers: Reach more customers. Together, we build successful businesses.'
@@ -247,14 +251,14 @@ const Home = () => {
             <div className="flex flex-col sm:flex-row justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
               {isAuthenticated ? (
                 <>
-                  <button 
+                  <button
                     onClick={() => navigate('/products')}
                     className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 flex items-center justify-center"
                   >
                     <span className="mr-2">🛒</span> Browse Products
                   </button>
                   {userType === 'seller' && (
-                    <button 
+                    <button
                       onClick={() => navigate('/seller/store')}
                       className="bg-transparent border-2 border-orange-500 text-orange-600 hover:bg-orange-50 hover:text-orange-700 font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 flex items-center justify-center"
                     >
@@ -264,13 +268,13 @@ const Home = () => {
                 </>
               ) : (
                 <>
-                  <button 
+                  <button
                     onClick={() => navigate('/login')}
                     className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 flex items-center justify-center"
                   >
                     <span className="mr-2">🛒</span> Find Suppliers
                   </button>
-                  <button 
+                  <button
                     onClick={() => navigate('/login')}
                     className="bg-transparent border-2 border-orange-500 text-orange-600 hover:bg-orange-50 hover:text-orange-700 font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 flex items-center justify-center"
                   >
@@ -301,7 +305,7 @@ const Home = () => {
             Why Choose ProjectX?
           </h2>
           <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
-            Whether you're a food seller looking for quality ingredients or a supplier wanting to expand your reach, 
+            Whether you're a food seller looking for quality ingredients or a supplier wanting to expand your reach,
             we provide the tools and connections you need to succeed.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -391,17 +395,17 @@ const Home = () => {
             Ready to Grow Your Business?
           </h2>
           <p className="text-orange-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of food sellers and suppliers who trust ProjectX for their business needs. 
+            Join thousands of food sellers and suppliers who trust ProjectX for their business needs.
             Start your journey today and experience the difference.
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <button 
+            <button
               onClick={() => navigate('/login')}
               className="bg-white text-orange-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition duration-300"
             >
               Get Started Today
             </button>
-            <button 
+            <button
               onClick={() => navigate('/products')}
               className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-orange-600 font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition duration-300"
             >

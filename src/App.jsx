@@ -9,6 +9,7 @@ import { useAuth } from './hooks/useAuth';
 import { config } from './config/env.js';
 import AddProductPage from './pages/Seller/AddProduct.jsx';
 import ShoppingCartPage from './pages/Home/Cart.jsx';
+import MyOrders from './pages/Buyer/MyOrders.jsx';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, userType = null }) => {
@@ -179,14 +180,11 @@ const App = () => {
 
           {/* Buyer-specific routes */}
           <Route
-            path="/buyer/*"
+            path="/buyer/myOrders"
             element={
               <ProtectedRoute userType="buyer">
                 <AuthenticatedLayout>
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <h1 className="text-3xl font-bold text-white mb-4">Buyer Dashboard</h1>
-                    <p className="text-gray-300">Buyer-specific features coming soon...</p>
-                  </div>
+                  <MyOrders/>
                 </AuthenticatedLayout>
               </ProtectedRoute>
             }
