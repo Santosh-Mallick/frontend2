@@ -1,75 +1,62 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../hooks/useAuth';
 
 const ProductList = () => {
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  const navigate = useNavigate();
+  const location = useLocation();
   const { addToCart, updateQuantity, items: cartItems, totalItems } = useCart();
+  const { currentUser } = useAuth();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock product data for the 'Vegetables and Fruits' category
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: 'Fresh Tomatoes',
-      price: 30, // Price per kg/unit
-      unit: 'kg',
-      image: 'https://via.placeholder.com/150/FF6347/FFFFFF?text=Tomatoes',
-      isEcoFriendly: false,
-    },
-    {
-      id: 2,
-      name: 'Organic Spinach',
-      price: 20,
-      unit: 'bunch',
-      image: 'https://via.placeholder.com/150/66BB6A/FFFFFF?text=Spinach',
-      isEcoFriendly: false,
-    },
-    {
-      id: 3,
-      name: 'Sweet Apples',
-      price: 120,
-      unit: 'kg',
-      image: 'https://via.placeholder.com/150/FFB74D/FFFFFF?text=Apples',
-      isEcoFriendly: false,
-    },
-    {
-      id: 4,
-      name: 'Potatoes (New Crop)',
-      price: 25,
-      unit: 'kg',
-      image: 'https://via.placeholder.com/150/BDBDBD/FFFFFF?text=Potatoes',
-      isEcoFriendly: false,
-    },
-    {
-      id: 5,
-      name: 'Green Bell Peppers',
-      price: 45,
-      unit: 'piece',
-      image: 'https://via.placeholder.com/150/8BC34A/FFFFFF?text=Bell+Peppers',
-      isEcoFriendly: false,
-    },
-    {
-      id: 6,
-      name: 'Bananas (Ripe)',
-      price: 60,
-      unit: 'dozen',
-      image: 'https://via.placeholder.com/150/FFF176/FFFFFF?text=Bananas',
-      isEcoFriendly: false,
-    },
-    {
-      id: 7,
-      name: '🌱 Eco-Friendly Bags (Pack of 50)',
-      price: 50, // Price for pack of 50
-      unit: 'pack',
-      image: 'https://via.placeholder.com/150/4CAF50/FFFFFF?text=Eco+Bags+50',
-      isEcoFriendly: true,
-      description: 'Official eco-friendly bags provided by our application. Pack of 50 bags.',
-      isOfficialProduct: true,
-    },
-  ]);
+  const category = location.state?.category || 'All';
+  const productIDs = location.state?.productIDs || [];
+
+  const fetchAllProducts = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/buyer/get-all-seller-products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${currentUser?.token}`,
+        },
+        body: JSON.stringify({ productIDs }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Failed to fetch products');
+      }
+      const data = await res.json();
+      const allProducts = Object.values(data.productsBySeller || {}).flat();
+      setProducts(allProducts);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setError(error.message || 'Failed to load products.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllProducts();
+  }, [currentUser?.token]);
+
+  const filteredProducts = category === 'All' 
+    ? products 
+    : products.filter(product => product.category === category);
 
   const handleAddToCart = (product) => {
-    addToCart(product);
+    addToCart({
+      id: product._id,
+      name: product.name,
+      price: product.price,
+      unit: product.unit,
+      image: product.image || 'https://via.placeholder.com/150',
+      isEcoFriendly: product.isEcoFriendly,
+    });
   };
 
   const handleSubtractFromCart = (productId) => {
@@ -79,7 +66,6 @@ const ProductList = () => {
     }
   };
 
-  // Get quantity for a specific product from cart
   const getProductQuantity = (productId) => {
     const cartItem = cartItems.find(item => item.id === productId);
     return cartItem ? cartItem.quantity : 0;
@@ -87,10 +73,9 @@ const ProductList = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 font-sans">
-      {/* Back Button */}
       <div className="container mx-auto mt-4">
         <button
-          onClick={() => navigate('/')} // Navigate to the home path
+          onClick={() => navigate('/')}
           className="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition duration-300 shadow-md"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -100,74 +85,84 @@ const ProductList = () => {
         </button>
       </div>
 
-      {/* Category Header */}
       <div className="container mx-auto mt-8 mb-6">
         <h1 className="text-4xl font-extrabold text-gray-800 mb-2 text-center">
-          Vegetables & Fruits 🍎🥦
+          {category === 'All' ? 'All Products' : `${category} Products`} {category === 'Vegetable' ? '🥕' : category === 'Fruit' ? '🍎' : category === 'Dairy' ? '🥛' : category === 'Groceries' ? '🛒' : category === 'Eco' ? '📦' : category === 'Meat' ? '🍖' : category === 'Bakery' ? '🥖' : ''}
         </h1>
         <p className="text-lg text-gray-600 text-center">
           Freshly sourced, quality produce for your street food needs.
         </p>
       </div>
 
-      {/* Products Grid */}
-      <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition duration-300 border border-gray-100 flex flex-col"
-          >
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-40 object-cover"
-            />
-            <div className="p-4 flex-grow flex flex-col justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                  {product.name}
-                </h3>
-                <p className="text-gray-600 text-sm mb-3">
-                  ₹{product.price} / {product.unit}
-                </p>
-              </div>
-
-              {/* Eco-friendly badge */}
-              {product.isEcoFriendly && (
-                <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                  🌱 Eco
+      {loading ? (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading products...</p>
+        </div>
+      ) : error ? (
+        <div className="text-center py-8 text-red-600 font-medium">
+          <p>Error: {error}</p>
+          <p>Please try again later.</p>
+        </div>
+      ) : filteredProducts.length > 0 ? (
+        <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
+          {filteredProducts.map((product) => (
+            <div
+              key={product._id}
+              className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition duration-300 border border-gray-100 flex flex-col"
+            >
+              <img
+                src={product.image || 'https://via.placeholder.com/150'}
+                alt={product.name}
+                className="w-full h-40 object-cover"
+              />
+              <div className="p-4 flex-grow flex flex-col justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                    {product.name}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-3">
+                    ₹{product.price} / {product.unit}
+                  </p>
                 </div>
-              )}
-
-              {/* Quantity Selector */}
-              <div className="flex items-center justify-center space-x-3 mt-auto">
-                <button
-                  onClick={() => handleSubtractFromCart(product.id)}
-                  disabled={getProductQuantity(product.id) === 0}
-                  className={`px-3 py-1 rounded-full font-bold text-lg transition duration-300 ${
-                    getProductQuantity(product.id) === 0
-                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                      : 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-                  }`}
-                >
-                  -
-                </button>
-                <span className="text-xl font-bold text-gray-800 w-8 text-center">
-                  {getProductQuantity(product.id)}
-                </span>
-                <button
-                  onClick={() => handleAddToCart(product)}
-                  className="px-3 py-1 rounded-full bg-orange-500 text-white font-bold text-lg hover:bg-orange-600 transition duration-300"
-                >
-                  +
-                </button>
+                {product.isEcoFriendly && (
+                  <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                    🌱 Eco
+                  </div>
+                )}
+                <div className="flex items-center justify-center space-x-3 mt-auto">
+                  <button
+                    onClick={() => handleSubtractFromCart(product._id)}
+                    disabled={getProductQuantity(product._id) === 0}
+                    className={`px-3 py-1 rounded-full font-bold text-lg transition duration-300 ${
+                      getProductQuantity(product._id) === 0
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-orange-100 text-orange-600 hover:bg-orange-200'
+                    }`}
+                  >
+                    -
+                  </button>
+                  <span className="text-xl font-bold text-gray-800 w-8 text-center">
+                    {getProductQuantity(product._id)}
+                  </span>
+                  <button
+                    onClick={() => handleAddToCart(product)}
+                    className="px-3 py-1 rounded-full bg-orange-500 text-white font-bold text-lg hover:bg-orange-600 transition duration-300"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8 text-gray-600 font-medium">
+          <p>No products found in this category.</p>
+          <p>Try browsing other categories or check back later.</p>
+        </div>
+      )}
 
-      {/* Fixed "Go to Cart" button */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-orange-600 text-white shadow-lg text-center">
         <button
           onClick={() => navigate('/buyer/cart')}
