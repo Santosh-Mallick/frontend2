@@ -292,6 +292,9 @@ const ShoppingCartPage = () => {
                   <div className="flex-grow">
                     <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>
                     <p className="text-gray-600">₹{item.price.toFixed(2)} / {item.unit}</p>
+                    {item.isEcoFriendly && (
+                      <p className="text-green-600 text-sm font-medium">📦 50 pcs per pack</p>
+                    )}
                     <div className="flex items-center mt-2">
                       <button
                         onClick={() => handleDecreaseQuantity(item.id)}
@@ -328,12 +331,12 @@ const ShoppingCartPage = () => {
               {/* Eco-friendly Points Info */}
               {totalEcoFriendlyQuantity > 0 && (
                 <div className="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                  <h3 className="text-sm font-semibold text-green-900 mb-2">🌱 Official Eco-Friendly Bags</h3>
+                  <h3 className="text-sm font-semibold text-green-900 mb-2">🌱 Eco-Friendly Products</h3>
                   <div className="text-xs text-green-700">
-                    <p>Official eco bags in cart: <span className="font-semibold">{totalEcoFriendlyQuantity}</span></p>
+                    <p>Eco-friendly pieces in cart: <span className="font-semibold">{totalEcoFriendlyQuantity}</span></p>
                     <p>Points to earn: <span className="font-semibold">{Math.floor(totalEcoFriendlyQuantity / 100)}</span></p>
-                    <p className="text-xs text-green-600 mt-1">(1 point per 100 official eco bags)</p>
-                    <p className="text-xs text-green-600">Only official eco bags earn credit points!</p>
+                    <p className="text-xs text-green-600 mt-1">(1 point per 100 eco-friendly pieces)</p>
+                    <p className="text-xs text-green-600">Only eco-friendly products earn credit points!</p>
                   </div>
                 </div>
               )}

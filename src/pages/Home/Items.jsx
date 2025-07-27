@@ -130,6 +130,11 @@ const ProductList = () => {
                     🌱 Eco
                   </div>
                 )}
+                {product.isEcoFriendly && (
+                  <div className="text-green-600 text-xs font-medium mb-2">
+                    📦 50 pcs per pack
+                  </div>
+                )}
                 <div className="flex items-center justify-center space-x-3 mt-auto">
                   <button
                     onClick={() => handleSubtractFromCart(product._id)}

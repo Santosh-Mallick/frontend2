@@ -145,6 +145,11 @@ const SellerProductPage = () => {
                   />
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">{product.name}</h3>
                   <p className="text-gray-600 mb-3 text-sm">{product.description || 'No description provided.'}</p>
+                  {product.isEcoFriendly && (
+                    <div className="text-green-600 text-sm font-medium mb-2">
+                      📦 50 pcs per pack
+                    </div>
+                  )}
                   <p className="text-2xl font-bold text-orange-600 mb-4">
                     ₹{product.price.toFixed(2)} / {product.unit}
                   </p>
