@@ -11,7 +11,8 @@ import {
   Plus,
   ShoppingBag,
   BarChart3,
-  MessageSquare
+  MessageSquare,
+  Eye
 } from 'lucide-react';
 
 const SellerDashboard = () => {
@@ -58,6 +59,13 @@ const SellerDashboard = () => {
       icon: <Plus className="w-8 h-8" />,
       action: () => navigate('/seller/products/add'),
       color: "bg-green-500 hover:bg-green-600"
+    },
+    {
+      title: "Manage Products",
+      description: "View, edit, and delete your products",
+      icon: <Eye className="w-8 h-8" />,
+      action: () => navigate('/seller/product-management'),
+      color: "bg-indigo-500 hover:bg-indigo-600"
     },
     {
       title: "View Orders",

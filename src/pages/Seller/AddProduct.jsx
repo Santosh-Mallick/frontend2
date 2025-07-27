@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Package, DollarSign, AlignLeft, Tag, Hash, Box, Image as ImageIcon, Ruler, Weight } from 'lucide-react'; // Added Ruler/Weight for unit
+import { API_ENDPOINTS } from '../../config/api';
 
 const AddProductPage = () => {
+  const navigate = useNavigate();
+  
   // Define allowed units based on your schema enum.
   // These will be used for both quantity and price per unit.
   const productUnits = ['pieces', 'kg', 'gram', 'litre', 'ml', 'packet'];
@@ -22,7 +26,6 @@ const AddProductPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-
 
   // Handler for all text and number input changes
   const handleInputChange = (e) => {
@@ -71,47 +74,30 @@ const AddProductPage = () => {
       productData.append('category', formData.category);
       // For seller, you'd typically get this from user context (e.g., from an authenticated user ID)
       // For this example, we'll use a placeholder or assume it's set server-side
-      productData.append('seller', '60c72b2f9c1b3c0015b8d67a'); // Placeholder seller ID
+      productData.append('seller', '6885b8d5494eb7af762072ff'); // Test seller ID
       productData.append('quantity', parseInt(formData.quantity, 10)); // Convert to integer
       productData.append('unit', formData.unit);
-      // NOTE: Your Mongoose schema does NOT currently have a field for 'pricePerUnitOption'.
-      // You would need to add something like `priceUnit: { type: String, enum: ['pieces', 'kg', ...], required: true }`
-      // to your ProductSchema if you want to store this on the backend.
-      // For now, we'll append it to FormData, but your backend might ignore it.
       productData.append('pricePerUnitOption', formData.pricePerUnitOption);
 
       if (formData.image) {
         productData.append('image', formData.image); // Append the File object
       }
 
-      // --- Simulating API call ---
-      console.log('Submitting product data:', {
-        name: formData.name,
-        price: parseFloat(formData.price),
-        description: formData.description,
-        category: formData.category,
-        seller: '60c72b2f9c1b3c0015b8d67a', // Placeholder
-        quantity: parseInt(formData.quantity, 10),
-        unit: formData.unit,
-        pricePerUnitOption: formData.pricePerUnitOption, // Include new field in console log
-        image: formData.image ? formData.image.name : 'No image',
+      // Make API call to backend
+      const response = await fetch(API_ENDPOINTS.ADD_PRODUCT, {
+        method: 'POST',
+        body: productData, // For FormData, fetch automatically sets Content-Type: multipart/form-data
       });
 
-      // In a real application, you would make a fetch or axios call here:
-      // const response = await fetch('/api/products', {
-      //   method: 'POST',
-      //   body: productData, // For FormData, fetch automatically sets Content-Type: multipart/form-data
-      // });
-      // const result = await response.json();
-      // if (!response.ok) {
-      //   throw new Error(result.message || 'Failed to add product');
-      // }
-
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to add product');
+      }
 
       setSuccessMessage('Product added successfully!');
-      // Optionally reset form after successful submission
+      
+      // Reset form after successful submission
       setFormData({
         name: '',
         price: '',
@@ -119,10 +105,15 @@ const AddProductPage = () => {
         category: '',
         quantity: '',
         unit: 'pieces',
-        pricePerUnitOption: 'pieces', // Reset new field too
+        pricePerUnitOption: 'pieces',
         image: null,
         imageUrlPreview: null,
       });
+
+      // Redirect to seller product management page after 2 seconds
+      setTimeout(() => {
+        navigate('/seller/product-management');
+      }, 2000);
     } catch (err) {
       setError(err.message || 'An unexpected error occurred.');
     } finally {
@@ -139,6 +130,33 @@ const AddProductPage = () => {
           <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded" role="alert">
             <p className="font-bold">Success!</p>
             <p>{successMessage}</p>
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => navigate('/seller/product-management')}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                Manage Products
+              </button>
+              <button
+                onClick={() => {
+                  setSuccessMessage(null);
+                  setFormData({
+                    name: '',
+                    price: '',
+                    description: '',
+                    category: '',
+                    quantity: '',
+                    unit: 'pieces',
+                    pricePerUnitOption: 'pieces',
+                    image: null,
+                    imageUrlPreview: null,
+                  });
+                }}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                Add Another Product
+              </button>
+            </div>
           </div>
         )}
 

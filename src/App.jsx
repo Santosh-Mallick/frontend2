@@ -10,6 +10,7 @@ import { config } from './config/env.js';
 import AddProductPage from './pages/Seller/AddProduct.jsx';
 import ShoppingCartPage from './pages/Home/Cart.jsx';
 import MyOrders from './pages/Buyer/MyOrders.jsx';
+import ProductManagement from './pages/Seller/ProductManagement.jsx';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, userType = null }) => {
@@ -236,7 +237,18 @@ const App = () => {
           />
 
           <Route
-            path="/seller/*"
+            path="/seller/product-management" 
+            element={
+              <ProtectedRoute userType="seller">
+                <AuthenticatedLayout>
+                  <ProductManagement />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route 
+            path="/seller/*" 
             element={
               <ProtectedRoute userType="seller">
                 <AuthenticatedLayout>
