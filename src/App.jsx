@@ -8,6 +8,7 @@ import SellerDashboard from './pages/Seller/SellerDashboard';
 import { useAuth } from './hooks/useAuth';
 import { config } from './config/env.js';
 import AddProductPage from './pages/Seller/AddProduct.jsx';
+import ProductManagement from './pages/Seller/ProductManagement.jsx';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, userType = null }) => {
@@ -220,6 +221,17 @@ const App = () => {
               <ProtectedRoute userType="seller">
                 <AuthenticatedLayout>
                   <AddProductPage />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/seller/product-management" 
+            element={
+              <ProtectedRoute userType="seller">
+                <AuthenticatedLayout>
+                  <ProductManagement />
                 </AuthenticatedLayout>
               </ProtectedRoute>
             }
