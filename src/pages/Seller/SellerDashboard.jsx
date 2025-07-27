@@ -80,7 +80,7 @@ const SellerDashboard = () => {
             setLoading(true);
             setError(null);
             try {
-                const res = await fetch(`http://localhost:5000/api/seller/seller-dashboard/${userEmail}`, {
+                const res = await fetch(`https://backend-sand-three-70.vercel.app/api/seller/seller-dashboard/${userEmail}`, {
                     method: 'GET',
                 });
 

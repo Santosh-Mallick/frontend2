@@ -16,7 +16,7 @@ const SellerProductPage = () => {
   const fetchSellerProducts = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:5000/api/buyer/seller-prod/${sellerId}`, 
+      const res = await fetch(`https://backend-sand-three-70.vercel.app/api/buyer/seller-prod/${sellerId}`, 
         {method: 'GET'}
       );
       const data = await res.json();

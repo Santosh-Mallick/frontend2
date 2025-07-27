@@ -17,7 +17,7 @@ const ProductList = () => {
 
   const fetchAllProducts = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/buyer/get-all-seller-products', {
+      const res = await fetch('https://backend-sand-three-70.vercel.app/api/buyer/get-all-seller-products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

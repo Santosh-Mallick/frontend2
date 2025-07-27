@@ -47,7 +47,7 @@ PORT=5000
 If you want to configure the API URL, create a `.env` file in the frontend directory:
 
 ```env
-VITE_API_URL=http://localhost:5000
+VITE_API_URL=https://backend-sand-three-70.vercel.app
 ```
 
 ## API Endpoints

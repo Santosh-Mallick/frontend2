@@ -120,7 +120,7 @@ const Home = () => {
         MAX_DISTANCE_KM: maxDistanceKm,
       };
 
-      const res = await fetch('http://localhost:5000/api/buyer/find-closest-sellers', {
+      const res = await fetch('https://backend-sand-three-70.vercel.app/api/buyer/find-closest-sellers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,7 +147,7 @@ const Home = () => {
 
   const fetchAllProducts = async (productIDs) => {
     try {
-      const res = await fetch('http://localhost:5000/api/buyer/get-all-seller-products', {
+      const res = await fetch('https://backend-sand-three-70.vercel.app/api/buyer/get-all-seller-products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

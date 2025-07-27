@@ -92,7 +92,7 @@ const ServerStatus = () => {
       {serverStatus === 'offline' && (
         <div className="mt-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
           <p className="text-red-300 text-xs">
-            Backend server is not running. Please start your backend server on http://localhost:5000
+            Backend server is not running. Please start your backend server on https://backend-sand-three-70.vercel.app
           </p>
         </div>
       )}

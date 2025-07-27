@@ -93,7 +93,7 @@ PORT=5000
 
 ### Frontend (.env)
 ```env
-VITE_API_URL=http://localhost:5000
+VITE_API_URL=https://backend-sand-three-70.vercel.app
 ```
 
 ## Setup Instructions
