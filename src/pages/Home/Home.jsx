@@ -192,7 +192,7 @@ const Home = () => {
         </div>
       </nav>
 
-      {isAuthenticated && <LocationManager />}
+      <LocationManager />
 
       {/* --- Hero Section --- */}
       <section className="bg-gradient-to-r from-orange-100 to-amber-100 py-16 px-4 md:py-24">
