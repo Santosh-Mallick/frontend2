@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Eye, EyeOff, User, ShoppingBag, Store, Phone, Mail, MapPin, Building } from 'lucide-react';
+import { Eye, EyeOff, User, ShoppingBag, Store, Phone, Mail, MapPin, Building, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { LocationPicker } from '../Other/LocationPicker';
 
 const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
   const { register } = useAuth();
@@ -24,6 +25,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
     fssaiNumber: '',
     shopPhoto: '',
     bannerImage: '',
+    location: { lat: 0, lng: 0 },
     paymentInfo: {
       upiId: '',
       bankAccountNumber: '',
@@ -35,6 +37,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -54,6 +57,14 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
       }));
     }
     if (error) setError('');
+  };
+
+  const handleLocationSelect = (location) => {
+    setFormData((prev) => ({
+      ...prev,
+      location,
+    }));
+    setIsLocationPickerOpen(false);
   };
 
   const handleSubmit = async (e) => {
@@ -101,7 +112,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
       }
 
       const result = await register(userData, formData.userType);
-      
+
       if (result.success) {
         onRegister(formData);
       } else {
@@ -125,11 +136,10 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
             <button
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, userType: 'buyer' }))}
-              className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all duration-200 ${
-                formData.userType === 'buyer'
+              className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all duration-200 ${formData.userType === 'buyer'
                   ? 'border-orange-400 bg-orange-500/20 text-orange-700'
                   : 'border-gray-300 bg-gray-50 text-gray-600 hover:border-orange-300'
-              }`}
+                }`}
             >
               <ShoppingBag size={20} />
               <span className="font-medium">Buyer</span>
@@ -137,11 +147,10 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
             <button
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, userType: 'seller' }))}
-              className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all duration-200 ${
-                formData.userType === 'seller'
+              className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all duration-200 ${formData.userType === 'seller'
                   ? 'border-amber-400 bg-amber-500/20 text-amber-700'
                   : 'border-gray-300 bg-gray-50 text-gray-600 hover:border-amber-300'
-              }`}
+                }`}
             >
               <Store size={20} />
               <span className="font-medium">Seller</span>
@@ -187,6 +196,47 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
                 className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                 placeholder="Enter owner name"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Location Of Shop *</label>
+              <button
+                type="button"
+                onClick={() => setIsLocationPickerOpen(true)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-left text-gray-600 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flex items-center gap-2"
+                // disabled={isSubmitting}
+              >
+                <MapPin className="w-4 h-4" />
+                {formData.location.lat === 0 && formData.location.lng === 0
+                  ? "Select Location"
+                  : `Lat: ${formData.location.lat.toFixed(4)}, Lng: ${formData.location.lng.toFixed(4)}`}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Location Picker Modal */}
+        {isLocationPickerOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-hidden">
+              <div className="p-6 border-b border-gray-100">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-blue-600" />
+                    Select Location
+                  </h2>
+                  <button
+                    onClick={() => setIsLocationPickerOpen(false)}
+                    className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    aria-label="Close location picker"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-6">
+                <LocationPicker onLocationSelect={handleLocationSelect} />
+              </div>
             </div>
           </div>
         )}
