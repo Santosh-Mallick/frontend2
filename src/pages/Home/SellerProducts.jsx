@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Plus, Minus, ChevronLeft, ShoppingCart } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
 
 const SellerProductPage = () => {
   const { sellerId } = useParams();
   console.log("Seller ID:", sellerId); // Debugging line to check sellerId
   const navigate = useNavigate();
+  const { items, addToCart, updateQuantity, totalItems } = useCart();
 
   const [sellerProducts, setSellerProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [tempCartQuantities, setTempCartQuantities] = useState({});
 
   const fetchSellerProducts = async () => {
     try {
@@ -37,25 +38,36 @@ const SellerProductPage = () => {
     fetchSellerProducts();
   }, [sellerId]);
 
-  const handleIncreaseQuantity = (productId) => {
-    setTempCartQuantities((prev) => ({
-      ...prev,
-      [productId]: (prev[productId] || 0) + 1,
-    }));
+  const handleIncreaseQuantity = (product) => {
+    const cartItem = items.find(item => item.id === product._id);
+    if (cartItem) {
+      // Item already in cart, increase quantity
+      updateQuantity(product._id, cartItem.quantity + 1);
+    } else {
+      // Add new item to cart
+      addToCart({
+        id: product._id,
+        name: product.name,
+        price: product.price,
+        unit: product.unit,
+        imageUrl: product.image,
+        isEcoFriendly: product.isEcoFriendly || false
+      });
+    }
   };
 
-  const handleDecreaseQuantity = (productId) => {
-    setTempCartQuantities((prev) => {
-      const newQuantity = (prev[productId] || 0) - 1;
-      if (newQuantity <= 0) {
-        const { [productId]: _, ...rest } = prev;
-        return rest;
-      }
-      return {
-        ...prev,
-        [productId]: newQuantity,
-      };
-    });
+  const handleDecreaseQuantity = (product) => {
+    const cartItem = items.find(item => item.id === product._id);
+    if (cartItem && cartItem.quantity > 1) {
+      updateQuantity(product._id, cartItem.quantity - 1);
+    } else if (cartItem && cartItem.quantity === 1) {
+      updateQuantity(product._id, 0); // This will remove the item
+    }
+  };
+
+  const getQuantityInCart = (productId) => {
+    const cartItem = items.find(item => item.id === productId);
+    return cartItem ? cartItem.quantity : 0;
   };
 
   if (loading) {
@@ -104,7 +116,7 @@ const SellerProductPage = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 pb-24">
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Available Products</h2>
 
         {sellerProducts.length === 0 ? (
@@ -116,7 +128,7 @@ const SellerProductPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sellerProducts.map((product) => {
-              const quantityInCart = tempCartQuantities[product._id] || 0;
+              const quantityInCart = getQuantityInCart(product._id);
               const isInCart = quantityInCart > 0;
 
               return (
@@ -139,7 +151,7 @@ const SellerProductPage = () => {
 
                   <div className="flex items-center justify-center space-x-3 w-full">
                     <button
-                      onClick={() => handleDecreaseQuantity(product._id)}
+                      onClick={() => handleDecreaseQuantity(product)}
                       className={`p-2 rounded-full ${
                         isInCart
                           ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
@@ -154,7 +166,7 @@ const SellerProductPage = () => {
                       {quantityInCart}
                     </span>
                     <button
-                      onClick={() => handleIncreaseQuantity(product._id)}
+                      onClick={() => handleIncreaseQuantity(product)}
                       className="p-2 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                       aria-label="Increase quantity"
                     >
@@ -173,6 +185,21 @@ const SellerProductPage = () => {
           </div>
         )}
       </main>
+
+      {/* Go to Cart Button */}
+      {totalItems > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-orange-500 p-4 shadow-lg">
+          <div className="container mx-auto">
+            <button
+              onClick={() => navigate('/buyer/cart')}
+              className="w-full bg-white text-orange-500 font-bold py-4 px-6 rounded-lg flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors shadow-md"
+            >
+              <ShoppingCart size={24} />
+              <span className="text-lg">Go to Cart ({totalItems} Items)</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
