@@ -17,6 +17,7 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import { API_ENDPOINTS } from '../../config/api';
+import { useAuth } from '../../hooks/useAuth';
 
 const ProductManagement = () => {
   const navigate = useNavigate();
@@ -30,9 +31,13 @@ const ProductManagement = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const { getUserInfo } = useAuth();
+  const userInfo = getUserInfo();
+  const userEmail = userInfo.email;
+  console.log("User email : ", userEmail);
 
   // Mock seller ID - in real app, get from auth context
-  const sellerId = '6885b8d5494eb7af762072ff';
+  // const sellerId = '6885b8d5494eb7af762072ff';
 
   useEffect(() => {
     fetchProducts();
@@ -41,10 +46,10 @@ const ProductManagement = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      console.log('Fetching products for seller:', sellerId);
-      console.log('API URL:', `${API_ENDPOINTS.GET_SELLER_PRODUCTS}/${sellerId}`);
+      // console.log('Fetching products for seller:', sellerId);
+      console.log('API URL:', `${API_ENDPOINTS.GET_SELLER_PRODUCTS}/${userEmail}`);
       
-      const response = await fetch(`${API_ENDPOINTS.GET_SELLER_PRODUCTS}/${sellerId}`);
+      const response = await fetch(`${API_ENDPOINTS.GET_SELLER_PRODUCTS}/${userEmail}`);
       
       console.log('Response status:', response.status);
       

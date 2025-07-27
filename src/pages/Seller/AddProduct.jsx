@@ -2,13 +2,18 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, DollarSign, AlignLeft, Tag, Hash, Box, Image as ImageIcon, Ruler, Weight } from 'lucide-react'; // Added Ruler/Weight for unit
 import { API_ENDPOINTS } from '../../config/api';
+import { useAuth } from '../../hooks/useAuth';
 
 const AddProductPage = () => {
   const navigate = useNavigate();
   
   // Define allowed units based on your schema enum.
   // These will be used for both quantity and price per unit.
-  const productUnits = ['pieces', 'kg', 'gram', 'litre', 'ml', 'packet'];
+  const productUnits = ['pieces', 'kg', 'gram', 'litre', 'ml', 'packet', 'dozen'];
+  const { getUserInfo } = useAuth();
+  const userInfo = getUserInfo();
+//   console.log("UserInfo : ", userInfo.email);
+  const userEmail = userInfo.email;
 
   // Initial state for the product form data
   const [formData, setFormData] = useState({
@@ -74,7 +79,7 @@ const AddProductPage = () => {
       productData.append('category', formData.category);
       // For seller, you'd typically get this from user context (e.g., from an authenticated user ID)
       // For this example, we'll use a placeholder or assume it's set server-side
-      productData.append('seller', '6885b8d5494eb7af762072ff'); // Test seller ID
+      productData.append('sellerMail', userEmail); // Test seller ID
       productData.append('quantity', parseInt(formData.quantity, 10)); // Convert to integer
       productData.append('unit', formData.unit);
       productData.append('pricePerUnitOption', formData.pricePerUnitOption);
