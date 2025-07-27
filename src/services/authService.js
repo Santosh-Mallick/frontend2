@@ -18,7 +18,6 @@ class AuthService {
         : API_ENDPOINTS.AUTH.SELLER_LOGIN;
 
       const requestBody = {
-        email,
         phone,
         password
       };
@@ -47,11 +46,22 @@ class AuthService {
 
       const data = await response.json();
       
+      console.log('AuthService - Login backend response data:', data);
+      
+      // Check if backend response contains role that might override our passed userType
+      if (data.role) {
+        console.log('AuthService - Backend response contains role:', data.role);
+        console.log('AuthService - We will use the backend role instead of passed userType');
+        userType = data.role; // Use the role from backend response
+      }
+      
       // Store token and user data in localStorage
       try {
         localStorage.setItem('token', data.token);
         localStorage.setItem('userType', userType);
         localStorage.setItem('user', JSON.stringify(data.user));
+        
+        console.log('AuthService - Login stored userType in localStorage:', localStorage.getItem('userType'));
         
         // Store specific user information for easy access
         this.storeUserInfo(data.user, userType);
@@ -80,9 +90,14 @@ class AuthService {
   // Register user
   async register(userData, userType) {
     try {
+      console.log('AuthService - Register called with userType:', userType);
+      console.log('AuthService - UserData being sent:', userData);
+      
       const endpoint = userType === 'buyer' 
         ? API_ENDPOINTS.AUTH.BUYER_REGISTER
         : API_ENDPOINTS.AUTH.SELLER_REGISTER;
+
+      console.log('AuthService - Using endpoint:', endpoint);
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -93,18 +108,35 @@ class AuthService {
         body: JSON.stringify(userData),
       });
 
+      console.log('AuthService - Response status:', response.status);
+      console.log('AuthService - Response ok:', response.ok);
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.log('AuthService - Error response:', errorData);
         throw new Error(errorData.message || 'Registration failed');
       }
 
       const data = await response.json();
+      
+      console.log('AuthService - Backend response data:', data);
+      console.log('AuthService - Registration successful, storing userType:', userType);
+      
+      // Check if backend response contains role that might override our passed userType
+      if (data.role) {
+        console.log('AuthService - Backend response contains role:', data.role);
+        console.log('AuthService - We will use the backend role instead of passed userType');
+        userType = data.role; // Use the role from backend response
+      }
       
       // Store token and user data in localStorage
       try {
         localStorage.setItem('token', data.token);
         localStorage.setItem('userType', userType);
         localStorage.setItem('user', JSON.stringify(data.user));
+        
+        console.log('AuthService - Stored userType in localStorage:', localStorage.getItem('userType'));
+        console.log('AuthService - Stored user in localStorage:', localStorage.getItem('user'));
         
         // Store specific user information for easy access
         this.storeUserInfo(data.user, userType);
