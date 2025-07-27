@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Eye, EyeOff, User, ShoppingBag, Store, Phone, Mail, MapPin, Building, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { LocationPicker } from '../Other/LocationPicker';
+import { useNavigate } from 'react-router-dom';
 
 const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
   const { register } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     userType: 'buyer',
     name: '',
@@ -38,6 +40,7 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -71,6 +74,12 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setSuccessMessage('');
+
+    // Debug logging
+    console.log('Registration - User Type:', formData.userType);
+    console.log('Registration - Form Data:', formData);
+    console.log('Registration - Current userType before submission:', formData.userType);
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
@@ -83,6 +92,20 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
       setError('Password must be at least 6 characters long');
       setIsLoading(false);
       return;
+    }
+
+    // Validate seller-specific fields
+    if (formData.userType === 'seller') {
+      if (!formData.ownerName || formData.ownerName.trim() === '') {
+        setError('Owner name is required for sellers');
+        setIsLoading(false);
+        return;
+      }
+      if (!formData.fssaiNumber || formData.fssaiNumber.trim() === '') {
+        setError('FSSAI number is required for sellers');
+        setIsLoading(false);
+        return;
+      }
     }
 
     try {
@@ -105,15 +128,37 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
         userData.email = formData.email;
         userData.ownerName = formData.ownerName;
         userData.products = formData.products;
-        userData.fssaiNumber = formData.fssaiNumber;
+        userData.fssaiNumber = formData.fssaiNumber; // Now required, so always include
         userData.shopPhoto = formData.shopPhoto;
         userData.bannerImage = formData.bannerImage;
         userData.paymentInfo = formData.paymentInfo;
       }
 
-      const result = await register(userData, formData.userType);
+      console.log('Registration - Final User Data:', userData);
+      console.log('Registration - User Type being sent:', formData.userType);
 
+      const result = await register(userData, formData.userType);
+      
+      console.log('Registration - Result:', result);
+      
       if (result.success) {
+        // Show success message
+        const message = formData.userType === 'buyer' 
+          ? `Welcome, ${formData.name}! Your account has been created successfully.`
+          : `Welcome, ${formData.ownerName}! Your store has been created successfully.`;
+        
+        setSuccessMessage(message);
+        
+        // Navigate based on user type
+        setTimeout(() => {
+          console.log('Registration - Navigating to:', formData.userType === 'seller' ? '/seller/dashboard' : '/');
+          if (formData.userType === 'seller') {
+            navigate('/seller/dashboard');
+          } else {
+            navigate('/');
+          }
+        }, 1500);
+        
         onRegister(formData);
       } else {
         setError(result.message);
@@ -155,6 +200,16 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
               <Store size={20} />
               <span className="font-medium">Seller</span>
             </button>
+          </div>
+          {/* Visual indicator of selected userType */}
+          <div className="text-center">
+            <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+              formData.userType === 'buyer' 
+                ? 'bg-orange-100 text-orange-700' 
+                : 'bg-amber-100 text-amber-700'
+            }`}>
+              Currently selected: {formData.userType === 'buyer' ? 'Buyer' : 'Seller'}
+            </span>
           </div>
         </div>
 
@@ -238,6 +293,29 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
                 <LocationPicker onLocationSelect={handleLocationSelect} />
               </div>
             </div>
+          </div>
+        )}
+
+        {/* FSSAI Number (Seller only) */}
+        {formData.userType === 'seller' && (
+          <div className="space-y-2">
+            <label htmlFor="fssaiNumber" className="text-gray-700 text-sm font-medium">
+              FSSAI Number <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                id="fssaiNumber"
+                name="fssaiNumber"
+                value={formData.fssaiNumber}
+                onChange={handleInputChange}
+                required
+                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                placeholder="Enter FSSAI license number"
+              />
+            </div>
+            <p className="text-xs text-gray-500">FSSAI license number is required for food businesses</p>
           </div>
         )}
 
@@ -337,6 +415,13 @@ const RegisterForm = ({ onRegister, onSwitchToLogin }) => {
         {error && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-700 text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Success Message */}
+        {successMessage && (
+          <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-green-700 text-sm">{successMessage}</p>
           </div>
         )}
 

@@ -1,4 +1,4 @@
-import { ShoppingCart, User, LogOut } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Store, ShoppingBag, TrendingUp, Users, Shield } from 'lucide-react';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
@@ -19,62 +19,92 @@ const Home = () => {
     }
   };
 
-  // Mock seller data (now representing raw material providers)
-  const sellers = [
+  // Mock supplier data (representing raw material providers)
+  const suppliers = [
     {
       id: 1,
-      name: "Fresh Veggies & Fruits Co.",
-      foodTypes: ['Vegetables', 'Fruits', 'Organic'],
+      name: "Fresh Harvest Co.",
+      categories: ['Vegetables', 'Fruits', 'Organic'],
       rating: 4.8,
       isOpen: true,
       color: 'bg-green-500',
-      text: 'Veggies'
+      text: 'Fresh Produce',
+      description: 'Premium quality vegetables and fruits'
     },
     {
       id: 2,
-      name: "Spices & Grains Mart",
-      foodTypes: ['Spices', 'Grains', 'Pulses'],
+      name: "Spice & Grain Hub",
+      categories: ['Spices', 'Grains', 'Pulses'],
       rating: 4.5,
-      isOpen: false, // Could be closed for the day
+      isOpen: true,
       color: 'bg-orange-500',
-      text: 'Spices'
+      text: 'Spices & Grains',
+      description: 'Authentic spices and quality grains'
     },
     {
       id: 3,
-      name: "Dairy & Oil Supplies",
-      foodTypes: ['Milk', 'Cheese', 'Cooking Oil'],
+      name: "Dairy Delights",
+      categories: ['Milk', 'Cheese', 'Butter'],
       rating: 4.9,
       isOpen: true,
-      color: 'bg-gray-500',
-      text: 'Dairy'
+      color: 'bg-blue-500',
+      text: 'Dairy Products',
+      description: 'Fresh dairy products daily'
     },
     {
       id: 4,
-      name: "Meat & Poultry Hub",
-      foodTypes: ['Chicken', 'Mutton', 'Fish'],
+      name: "Premium Meats",
+      categories: ['Chicken', 'Mutton', 'Fish'],
       rating: 4.2,
       isOpen: true,
       color: 'bg-red-500',
-      text: 'Meat'
+      text: 'Fresh Meats',
+      description: 'Quality meat and poultry'
     },
     {
       id: 5,
-      name: "Packaging Solutions Inc.",
-      foodTypes: ['Eco-friendly Bags', 'Containers'],
+      name: "Eco Packaging",
+      categories: ['Eco-friendly Bags', 'Containers'],
       rating: 4.6,
-      isOpen: false, // Out of stock or closed for maintenance
+      isOpen: true,
       color: 'bg-cyan-500',
-      text: 'Packaging'
+      text: 'Packaging',
+      description: 'Sustainable packaging solutions'
     },
     {
       id: 6,
-      name: "Wholesale Bakery Goods",
-      foodTypes: ['Buns', 'Breads', 'Flour'],
+      name: "Bakery Essentials",
+      categories: ['Flour', 'Breads', 'Baking Items'],
       rating: 4.7,
       isOpen: true,
-      color: 'bg-lime-500',
-      text: 'Bakery'
+      color: 'bg-amber-500',
+      text: 'Bakery Items',
+      description: 'Fresh bakery ingredients'
     },
+  ];
+
+  // Features for both buyers and sellers
+  const features = [
+    {
+      icon: <ShoppingBag className="w-8 h-8" />,
+      title: "Quality Products",
+      description: "Source fresh, high-quality ingredients from verified suppliers"
+    },
+    {
+      icon: <Store className="w-8 h-8" />,
+      title: "Easy Management",
+      description: "Manage your inventory and orders efficiently"
+    },
+    {
+      icon: <TrendingUp className="w-8 h-8" />,
+      title: "Growth Opportunities",
+      description: "Expand your business with reliable supply chain"
+    },
+    {
+      icon: <Shield className="w-8 h-8" />,
+      title: "Trusted Partners",
+      description: "Connect with verified and trusted suppliers"
+    }
   ];
 
   return (
@@ -125,7 +155,7 @@ const Home = () => {
                           navigate('/products');
                         }}
                       >
-                        View Products
+                        Browse Products
                       </a>
                       {userType === 'buyer' && (
                         <a
@@ -171,7 +201,7 @@ const Home = () => {
                           navigate('/login');
                         }}
                       >
-                        Sign in as Street Food Seller
+                        Sign in as Food Seller
                       </a>
                       <a
                         href="#"
@@ -181,7 +211,7 @@ const Home = () => {
                           navigate('/login');
                         }}
                       >
-                        Sign in as Raw Material Provider
+                        Sign in as Supplier
                       </a>
                     </>
                   )}
@@ -202,13 +232,15 @@ const Home = () => {
             <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
               {isAuthenticated 
                 ? `Welcome back, ${userType === 'buyer' ? userInfo?.name : userInfo?.ownerName || userInfo?.shopName}! 🎉`
-                : 'Connect Directly with Raw Material Suppliers 🤝'
+                : 'Your Gateway to Quality Ingredients & Business Growth 🚀'
               }
             </h1>
             <p className="text-lg text-gray-600 mb-8">
               {isAuthenticated 
-                ? `Ready to ${userType === 'buyer' ? 'find fresh ingredients' : 'manage your store'}?`
-                : 'Street food sellers: Source fresh, quality ingredients. Providers: Expand your reach to local food businesses.'
+                ? userType === 'buyer' 
+                  ? 'Discover fresh, quality ingredients for your food business. Connect with trusted suppliers and grow your enterprise.'
+                  : 'Manage your store efficiently and connect with food sellers. Expand your reach and boost your business.'
+                : 'Food sellers: Source premium ingredients. Suppliers: Reach more customers. Together, we build successful businesses.'
               }
             </p>
             <div className="flex flex-col sm:flex-row justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
@@ -253,48 +285,77 @@ const Home = () => {
             <div className="w-full max-w-md h-64 bg-gradient-to-br from-orange-200 to-amber-200 rounded-lg shadow-xl flex items-center justify-center">
               <div className="text-center">
                 <div className="text-6xl mb-4">🤝</div>
-                <p className="text-lg font-semibold text-gray-700">Supplier to Seller Connection</p>
+                <p className="text-lg font-semibold text-gray-700">Connecting Suppliers & Sellers</p>
+                <p className="text-sm text-gray-600 mt-2">Building successful partnerships</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* --- Recommended Sellers Section (now Providers) --- */}
+      {/* --- Features Section --- */}
+      <section className="py-16 px-4 bg-white">
+        <div className="container mx-auto">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">
+            Why Choose ProjectX?
+          </h2>
+          <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+            Whether you're a food seller looking for quality ingredients or a supplier wanting to expand your reach, 
+            we provide the tools and connections you need to succeed.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="text-center p-6 rounded-lg bg-gray-50 hover:bg-orange-50 transition duration-300">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 text-orange-600 rounded-full mb-4">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- Top Suppliers Section --- */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-            Top Raw Material Providers for You 🥕
+          <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">
+            Featured Suppliers 🥕
           </h2>
+          <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+            Connect with trusted suppliers offering quality ingredients and reliable service
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {sellers.map((seller) => (
+            {suppliers.map((supplier) => (
               <div
-                key={seller.id}
+                key={supplier.id}
                 className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 cursor-pointer border border-gray-100"
               >
                 {/* Replace image with colored div */}
-                <div className={`w-full h-48 ${seller.color} flex items-center justify-center`}>
+                <div className={`w-full h-48 ${supplier.color} flex items-center justify-center`}>
                   <div className="text-center text-white">
                     <div className="text-4xl mb-2">
-                      {seller.text === 'Veggies' && '🥕'}
-                      {seller.text === 'Spices' && '🌶️'}
-                      {seller.text === 'Dairy' && '🥛'}
-                      {seller.text === 'Meat' && '🍖'}
-                      {seller.text === 'Packaging' && '📦'}
-                      {seller.text === 'Bakery' && '🥖'}
+                      {supplier.text === 'Fresh Produce' && '🥕'}
+                      {supplier.text === 'Spices & Grains' && '🌶️'}
+                      {supplier.text === 'Dairy Products' && '🥛'}
+                      {supplier.text === 'Fresh Meats' && '🍖'}
+                      {supplier.text === 'Packaging' && '📦'}
+                      {supplier.text === 'Bakery Items' && '🥖'}
                     </div>
-                    <p className="text-xl font-bold">{seller.text}</p>
+                    <p className="text-xl font-bold">{supplier.text}</p>
                   </div>
                 </div>
                 <div className="p-5">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">{seller.name}</h3>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">{supplier.name}</h3>
+                  <p className="text-gray-600 text-sm mb-3">{supplier.description}</p>
                   <div className="flex flex-wrap gap-2 mb-3">
-                    {seller.foodTypes.map((type, index) => (
+                    {supplier.categories.map((category, index) => (
                       <span
                         key={index}
                         className="bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
                       >
-                        {type}
+                        {category}
                       </span>
                     ))}
                   </div>
@@ -303,21 +364,14 @@ const Home = () => {
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.92 8.727c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
-                      {seller.rating}
+                      {supplier.rating}
                     </span>
-                    <span
-                      className={`text-sm font-semibold px-2 py-0.5 rounded-full ${
-                        seller.isOpen ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {seller.isOpen ? 'Open' : 'Closed'}
+                    <span className="bg-green-100 text-green-800 text-sm font-semibold px-2 py-0.5 rounded-full">
+                      Available
                     </span>
                   </div>
                   <button
-                    className={`w-full py-2 rounded-md font-semibold text-white transition duration-300 ${
-                      seller.isOpen ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-400 cursor-not-allowed'
-                    }`}
-                    disabled={!seller.isOpen}
+                    className="w-full py-2 rounded-md font-semibold text-white bg-orange-500 hover:bg-orange-600 transition duration-300"
                     onClick={() => navigate('/products')}
                   >
                     View Products
@@ -325,6 +379,33 @@ const Home = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- Call to Action Section --- */}
+      <section className="py-16 px-4 bg-gradient-to-r from-orange-500 to-amber-500">
+        <div className="container mx-auto text-center">
+          <h2 className="text-3xl font-bold text-white mb-4">
+            Ready to Grow Your Business?
+          </h2>
+          <p className="text-orange-100 mb-8 max-w-2xl mx-auto">
+            Join thousands of food sellers and suppliers who trust ProjectX for their business needs. 
+            Start your journey today and experience the difference.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <button 
+              onClick={() => navigate('/login')}
+              className="bg-white text-orange-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition duration-300"
+            >
+              Get Started Today
+            </button>
+            <button 
+              onClick={() => navigate('/products')}
+              className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-orange-600 font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition duration-300"
+            >
+              Learn More
+            </button>
           </div>
         </div>
       </section>

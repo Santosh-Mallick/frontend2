@@ -47,9 +47,13 @@ const LoginForm = ({ onLogin }) => {
           
           setSuccessMessage(message);
           
-          // Navigate to home page after a short delay
+          // Navigate based on user type
           setTimeout(() => {
-            navigate('/');
+            if (formData.userType === 'seller') {
+              navigate('/seller/dashboard');
+            } else {
+              navigate('/');
+            }
           }, 1500);
         }
         onLogin(formData);

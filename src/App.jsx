@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './components/Login/LoginPage';
-import Navbar from './components/Navigation/Navbar';
 import ServerStatus from './components/ServerStatus/ServerStatus';
 import Home from './pages/Home/Home';
 import ProductList from './pages/Home/Items';
+import SellerDashboard from './pages/Seller/SellerDashboard';
 import { useAuth } from './hooks/useAuth';
 import { config } from './config/env.js';
 
@@ -12,14 +12,24 @@ import { config } from './config/env.js';
 const ProtectedRoute = ({ children, userType = null }) => {
   const { isAuthenticated, currentUser, userType: authUserType } = useAuth();
   
+  console.log('ProtectedRoute - Checking access:');
+  console.log('ProtectedRoute - Required userType:', userType);
+  console.log('ProtectedRoute - Auth userType:', authUserType);
+  console.log('ProtectedRoute - isAuthenticated:', isAuthenticated);
+  console.log('ProtectedRoute - currentUser:', currentUser);
+  
   if (!isAuthenticated || !currentUser) {
+    console.log('ProtectedRoute - Redirecting to login (not authenticated)');
     return <Navigate to="/login" replace />;
   }
   
   if (userType && authUserType !== userType) {
+    console.log('ProtectedRoute - Redirecting to home (wrong user type)');
+    console.log('ProtectedRoute - Expected:', userType, 'Got:', authUserType);
     return <Navigate to="/" replace />;
   }
   
+  console.log('ProtectedRoute - Access granted');
   return children;
 };
 
@@ -38,7 +48,6 @@ const PublicRoute = ({ children }) => {
 const AuthenticatedLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <Navbar />
       {children}
     </div>
   );
@@ -183,14 +192,33 @@ const App = () => {
 
           {/* Seller-specific routes */}
           <Route 
+            path="/seller/dashboard" 
+            element={
+              <ProtectedRoute userType="seller">
+                <AuthenticatedLayout>
+                  <SellerDashboard />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/seller/store" 
+            element={
+              <ProtectedRoute userType="seller">
+                <AuthenticatedLayout>
+                  <SellerDashboard />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
             path="/seller/*" 
             element={
               <ProtectedRoute userType="seller">
                 <AuthenticatedLayout>
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <h1 className="text-3xl font-bold text-white mb-4">Seller Dashboard</h1>
-                    <p className="text-gray-300">Seller-specific features coming soon...</p>
-                  </div>
+                  <SellerDashboard />
                 </AuthenticatedLayout>
               </ProtectedRoute>
             } 
