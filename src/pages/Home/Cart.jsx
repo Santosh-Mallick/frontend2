@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { ShoppingCart, Trash2, Plus, Minus, XCircle } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { ShoppingCart, Trash2, Plus, Minus, XCircle, ChevronLeft } from 'lucide-react'; // Import ChevronLeft
+import { useNavigate } from 'react-router-dom';
 
 const ShoppingCartPage = () => {
   // Mock cart items for demonstration purposes
@@ -35,6 +36,7 @@ const ShoppingCartPage = () => {
 
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [showEmptyCartMessage, setShowEmptyCartMessage] = useState(false);
+  const navigate = useNavigate();
 
   // Calculate subtotal and total based on cart items
   const { subtotal, totalItems } = useMemo(() => {
@@ -97,10 +99,21 @@ const ShoppingCartPage = () => {
   return (
     <div className="min-h-screen bg-gray-100 pb-24"> {/* pb-24 to make space for fixed button */}
       <header className="bg-white shadow-sm p-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <ShoppingCart className="text-blue-600" size={24} />
-          Your Shopping Cart
-        </h1>
+        <div className="container mx-auto flex items-center justify-between">
+          <button
+            onClick={() => navigate('/')} // Navigate to home
+            className="p-2 rounded-full text-gray-600 hover:bg-gray-200 transition-colors flex items-center gap-1"
+            aria-label="Back to home"
+          >
+            <ChevronLeft size={20} />
+            <span className="hidden sm:inline">Back to Home</span>
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <ShoppingCart className="text-blue-600" size={24} />
+            Your Shopping Cart
+          </h1>
+          <div className="w-10"></div> {/* Spacer to balance the header */}
+        </div>
       </header>
 
       <main className="container mx-auto px-4 py-6">
